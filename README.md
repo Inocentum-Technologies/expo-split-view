@@ -19,9 +19,9 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 
 ## Example UI
 
-| Tablet / Desktop Split View (`width >= 768`) | Mobile Stack View (`width < 768`) |
-| :---: | :---: |
-| <img src="./assets/tablet-split-view.png" alt="Tablet Split View" width="550" /> | <img src="./assets/mobile-stack-view.png" alt="Mobile Stack View" width="260" /> |
+| Tablet / Desktop Split View (`width >= 768`) | Mobile Stack View (`width < 768`) | Split View in Action |
+| :---: | :---: | :---: |
+| <img src="./assets/tablet-split-view.png" alt="Tablet Split View" width="550" /> | <img src="./assets/mobile-stack-view.png" alt="Mobile Stack View" width="260" /> | <video src="./assets/expo-split-view-tablet-switch.webm" alt="Split view in action" width="600" controls="true" /> |
 
 ---
 

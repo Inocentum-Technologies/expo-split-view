@@ -10,6 +10,11 @@ This example showcases how `expo-split-view` smoothly transitions between tablet
 
 ---
 
+| Split View in Action |
+| :---: |
+| <video src="/expo-split-view-tablet-switch.webm" alt="Split view in action" width="600" controls="true" /> |
+---
+
 ## Quick Start
 
 ### From the Root Directory:
