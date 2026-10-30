@@ -1,5 +1,5 @@
 import { useTheme } from 'expo-router';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ColorValue, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { SplitViewPlaceholderProps } from './types';
 
 export function SplitViewPlaceholder({
@@ -29,14 +29,14 @@ export function SplitViewPlaceholder({
         <View
             style={[
                 styles.container,
-                { backgroundColor: theme?.colors?.background ?? '#ffffff' },
+                { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
                 placeholderContainerStyle,
             ]}
         >
             <Text
                 style={[
                     styles.text,
-                    { color: theme?.dark ? '#8E8E93' : '#888888' },
+                    { color: (theme?.dark ? '#8E8E93' : '#888888') as ColorValue },
                     placeholderTextStyle,
                 ]}
             >

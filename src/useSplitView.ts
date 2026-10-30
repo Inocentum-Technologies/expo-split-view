@@ -18,7 +18,12 @@ export function useSplitView(breakpoint = 768): UseSplitViewResult {
     const navigate = useCallback(
         (href: Href) => {
             if (isTablet) {
-                // Tablets: Replace active right-pane route
+                // Tablets: If user was navigating within subpages in the detail pane,
+                // dismiss them first so the new item starts clean at the stack root
+                // and previous detail screens/subpages do not linger in history.
+                if (typeof router.canDismiss === 'function' && router.canDismiss()) {
+                    router.dismissAll();
+                }
                 router.replace(href);
             } else {
                 // Phones: Push to stack normally

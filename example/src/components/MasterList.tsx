@@ -1,6 +1,6 @@
 import { useGlobalSearchParams, usePathname } from 'expo-router';
 import { useSplitView } from 'expo-split-view';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -19,29 +19,68 @@ const INDEX_ROUTES = new Set(['/', '/(home)', '/(home)/index']);
 export function MasterList() {
   const { navigate, isTablet } = useSplitView();
   const pathname = usePathname();
-  const { id: paramId } = useGlobalSearchParams<{ id?: string | string[] }>();
+  const globalParams = useGlobalSearchParams<{ id?: string | string[]; source?: string | string[] }>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-  // Resolve the active detail-pane item ID. useGlobalSearchParams gives us `id`
-  // directly from the [id] route; fall back to the last pathname segment as a
-  // safety net. Returns null when on an index/placeholder route.
+  // Map of known framework IDs for fast and reliable validation
+  const frameworkMap = useMemo(
+    () => new Map(FRAMEWORKS.map((item) => [item.id.toLowerCase(), item.id])),
+    []
+  );
+
+  // Persistent in-memory selection so navigating through subpages keeps the active state
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Resolve active detail-pane item ID across root screens, detail screens, and subpages
   const activeId = useMemo(() => {
-    if (INDEX_ROUTES.has(pathname)) return null;
+    const cleanPath = pathname.split('?')[0].replace(/\/+$/, '') || '/';
+    if (INDEX_ROUTES.has(cleanPath) || INDEX_ROUTES.has(pathname)) {
+      return null;
+    }
 
-    if (typeof paramId === 'string' && paramId.length > 0) return paramId;
-    if (Array.isArray(paramId) && paramId.length > 0) return paramId[0];
+    // 1. Direct match from route parameter `id`
+    const rawId = Array.isArray(globalParams.id) ? globalParams.id[0] : globalParams.id;
+    if (rawId && frameworkMap.has(rawId.toLowerCase())) {
+      return frameworkMap.get(rawId.toLowerCase())!;
+    }
 
-    // Fallback: last non-group segment of the clean pathname
-    const parts = pathname
-      .split('?')[0]
+    // 2. Match from query or navigation parameter `source`
+    const rawSource = Array.isArray(globalParams.source) ? globalParams.source[0] : globalParams.source;
+    if (rawSource && frameworkMap.has(rawSource.toLowerCase())) {
+      return frameworkMap.get(rawSource.toLowerCase())!;
+    }
+
+    // 3. Match from pathname segments (e.g. /react or /(home)/react/subpage)
+    const segments = cleanPath
       .split('/')
-      .filter((seg) => seg && seg !== '(home)' && seg !== 'index');
-    return parts.at(-1) ?? null;
-  }, [paramId, pathname]);
+      .filter((seg) => seg && !seg.startsWith('(') && seg !== 'index');
+    for (const seg of segments) {
+      if (frameworkMap.has(seg.toLowerCase())) {
+        return frameworkMap.get(seg.toLowerCase())!;
+      }
+    }
+
+    // 4. Retain previously selected framework when navigating within subpages
+    if (selectedId && frameworkMap.has(selectedId.toLowerCase())) {
+      return selectedId;
+    }
+
+    return null;
+  }, [pathname, globalParams.id, globalParams.source, frameworkMap, selectedId]);
+
+  // Keep selectedId state synchronized with route changes
+  useEffect(() => {
+    const cleanPath = pathname.split('?')[0].replace(/\/+$/, '') || '/';
+    if (INDEX_ROUTES.has(cleanPath) || INDEX_ROUTES.has(pathname)) {
+      setSelectedId(null);
+    } else if (activeId) {
+      setSelectedId(activeId);
+    }
+  }, [pathname, activeId]);
 
   const categories = ['All', 'UI Library', 'Framework', 'Full-Stack'];
 
@@ -178,7 +217,10 @@ export function MasterList() {
 
           return (
             <Pressable
-              onPress={() => navigate(`/(home)/${item.id}`)}
+              onPress={() => {
+                setSelectedId(item.id);
+                navigate(`/(home)/${item.id}`);
+              }}
               style={({ pressed }) => [
                 styles.itemCard,
                 {

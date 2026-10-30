@@ -155,20 +155,22 @@ export function useDetailScreenBack(
     const isTabletAtRoot = isTablet && !navigation.canGoBack();
 
     const handleBack = useCallback(() => {
-        if (!isTablet && checkHasIndexInHistory()) {
+        if (navigation.canGoBack()) {
+            router.back();
+        } else if (!isTablet && checkHasIndexInHistory()) {
             router.back();
         } else if (onFallback) {
             onFallback();
         } else {
             router.replace(targetFallback);
         }
-    }, [isTablet, checkHasIndexInHistory, router, onFallback, targetFallback]);
+    }, [navigation, isTablet, checkHasIndexInHistory, router, onFallback, targetFallback]);
 
     // Adaptive header tint color: user-specified color > theme colors > platform fallback
-    const tintColor = userTintColor ?? (
+    const tintColor: ColorValue = userTintColor ?? (
         Platform.OS === 'ios'
-            ? (theme?.colors?.primary || (theme?.dark ? '#0A84FF' : '#007AFF'))
-            : (theme?.colors?.text || (theme?.dark ? '#FFFFFF' : '#111827'))
+            ? ((theme?.colors?.primary as ColorValue) || (theme?.dark ? '#0A84FF' : '#007AFF'))
+            : ((theme?.colors?.text as ColorValue) || (theme?.dark ? '#FFFFFF' : '#111827'))
     );
 
     // 1. Header Back Button

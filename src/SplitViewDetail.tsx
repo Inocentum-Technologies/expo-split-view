@@ -1,6 +1,6 @@
 import { useTheme } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ColorValue, StyleSheet, View } from 'react-native';
 import type { SplitViewDetailProps } from './types';
 import { useDetailScreenBack } from './useDetailScreenBack';
 
@@ -20,7 +20,7 @@ export function SplitViewDetail({
         <View
             style={[
                 styles.container,
-                { backgroundColor: theme?.colors?.background ?? '#ffffff' },
+                { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
                 style,
             ]}
             {...panHandlers}

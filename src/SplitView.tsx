@@ -1,6 +1,6 @@
 import { Stack, useTheme } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ColorValue, StyleSheet, View, useWindowDimensions } from 'react-native';
 import type { SplitViewProps } from './types';
 
 export function SplitView({
@@ -21,7 +21,7 @@ export function SplitView({
     // Fill all safe-area padding gutters (status-bar strip, camera-cutout gap,
     // home-indicator strip) with the theme background so they never show a
     // jarring white/default colour in dark mode.
-    const gutterBg = theme?.colors?.background ?? '#ffffff';
+    const gutterBg = (theme?.colors?.background ?? '#ffffff') as ColorValue;
 
     return (
         // SafeAreaView applies the correct platform insets for the requested edges
@@ -43,8 +43,8 @@ export function SplitView({
                 style={[
                     styles.leftPane,
                     {
-                        borderColor: theme?.colors?.border ?? '#e0e0e0',
-                        backgroundColor: theme?.colors?.card ?? '#ffffff',
+                        borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
+                        backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
                         width: masterListWidth,
                     },
                     !isTablet && styles.hiddenPane,
@@ -61,7 +61,7 @@ export function SplitView({
             <View
                 style={[
                     styles.rightPane,
-                    { backgroundColor: theme?.colors?.background ?? '#ffffff' },
+                    { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
                     detailStyle,
                 ]}
             >

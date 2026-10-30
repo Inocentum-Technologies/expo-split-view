@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useDetailScreenBack } from 'expo-split-view';
 import { useMemo } from 'react';
 import {
@@ -15,6 +15,7 @@ import { useTheme } from '@/hooks/use-theme';
 export default function FrameworkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
+  const nav = useRouter();
 
   const framework = useMemo<FrameworkItem>(() => {
     return (
@@ -220,19 +221,34 @@ export default function FrameworkDetailScreen() {
         </View>
       </View>
 
-      {/* Official Link Button */}
-      <Pressable
-        onPress={() => Linking.openURL(framework.website)}
-        style={({ pressed }) => [
-          styles.actionButton,
-          { backgroundColor: framework.accentColor },
-          pressed && styles.actionButtonPressed,
-        ]}
-      >
-        <Text style={styles.actionButtonText}>
-          Visit {framework.name} Website ↗
-        </Text>
-      </Pressable>
+      <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+        <Pressable
+          onPress={() => nav.navigate({ pathname: "/subpage", params: { source: id, id } })}
+          style={({ pressed }) => [
+            styles.actionButton,
+            { backgroundColor: framework.accentColor },
+            pressed && styles.actionButtonPressed,
+          ]}
+        >
+          <Text style={styles.actionButtonText}>
+            Navigate to sub Page
+          </Text>
+        </Pressable>
+
+        {/* Official Link Button */}
+        <Pressable
+          onPress={() => Linking.openURL(framework.website)}
+          style={({ pressed }) => [
+            styles.actionButton,
+            { backgroundColor: framework.accentColor },
+            pressed && styles.actionButtonPressed,
+          ]}
+        >
+          <Text style={styles.actionButtonText}>
+            Visit {framework.name} Website ↗
+          </Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }

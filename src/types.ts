@@ -192,7 +192,7 @@ export interface UseSplitViewResult {
     width: number;
     /**
      * Navigates to a detail route:
-     * - On tablet: calls `router.replace(href)` to avoid stacking history in the right pane.
+     * - On tablet: dismisses any pushed subpages and calls `router.replace(href)` so right-pane history does not accumulate across items.
      * - On phone: calls `router.push(href)` to push onto the stack natively.
      */
     navigate: (href: Href) => void;
