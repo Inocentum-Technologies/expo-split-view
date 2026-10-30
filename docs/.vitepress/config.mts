@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "expo-split-view",
   description: "Adaptive master-detail split-view architecture for Expo Router",
+  base: "/expo-split-view",
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
