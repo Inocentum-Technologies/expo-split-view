@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": [
+    "index.ts",
+    "src/**/*"
+  ]
+}

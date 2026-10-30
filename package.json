@@ -1,0 +1,61 @@
+{
+  "name": "expo-split-view",
+  "version": "0.0.1-beta",
+  "description": "Responsive Master-Detail SplitView for Expo Router with automatic navigation coordination and back gesture handling.",
+  "main": "index.ts",
+  "types": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "app.plugin.js",
+    "expo-module.config.json"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "release": "npm publish --access public",
+    "example": "npm --prefix example start"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-module",
+    "expo-router",
+    "split-view",
+    "tablet",
+    "layout"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Inocentum-Technologies/expo-split-view.git"
+  },
+  "author": {
+    "name": "Inocentum Technologies",
+    "url": "https://github.com/Inocentum-Technologies"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Inocentum-Technologies/expo-split-view/issues"
+  },
+  "homepage": "https://github.com/Inocentum-Technologies/expo-split-view#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "expo": ">=55.0.0",
+    "expo-router": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*"
+  },
+  "peerDependenciesMeta": {
+    "@expo/config-plugins": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "typescript": ">=5.9.2"
+  }
+}

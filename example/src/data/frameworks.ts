@@ -1,0 +1,211 @@
+export interface FrameworkItem {
+  id: string;
+  name: string;
+  icon: string;
+  category: 'UI Library' | 'Framework' | 'Full-Stack' | 'Meta-Framework';
+  creator: string;
+  year: number;
+  tagline: string;
+  description: string;
+  accentColor: string;
+  badgeBg: string;
+  badgeText: string;
+  darkBadgeBg: string;
+  darkBadgeText: string;
+  website: string;
+  githubStars: string;
+  highlights: string[];
+}
+
+export const FRAMEWORKS: FrameworkItem[] = [
+  {
+    id: 'react',
+    name: 'React',
+    icon: '⚛️',
+    category: 'UI Library',
+    creator: 'Meta',
+    year: 2013,
+    tagline: 'The library for web and native user interfaces',
+    description:
+      'React lets you build user interfaces out of individual pieces called components. By breaking complex UIs into self-contained, reusable building blocks, developers can reason about state and rendering with confidence.\n\nOriginally created by Jordan Walke at Meta, React revolutionized front-end development with its declarative component model, one-way data flow, and virtual DOM diffing engine. Today, with React 19, Server Components, and Actions, it provides an end-to-end paradigm uniting client interactivity and server-driven performance across web and mobile platforms.',
+    accentColor: '#0ea5e9',
+    badgeBg: '#e0f2fe',
+    badgeText: '#0369a1',
+    darkBadgeBg: '#082f49',
+    darkBadgeText: '#7dd3fc',
+    website: 'https://react.dev',
+    githubStars: '228k',
+    highlights: ['Component-Driven', 'JSX Syntax', 'Hooks & Server Components', 'Vast Ecosystem'],
+  },
+  {
+    id: 'angular',
+    name: 'Angular',
+    icon: '🅰️',
+    category: 'Framework',
+    creator: 'Google',
+    year: 2016,
+    tagline: 'Deliver scalable web applications with confidence',
+    description:
+      'Angular is a full-featured, opinionated application design framework and development platform built on TypeScript. Created by Google, it is tailored specifically for enterprise-grade engineering where consistency, structure, and scale are paramount.\n\nThe framework provides a comprehensive suite of out-of-the-box tooling: dependency injection, deep client-side routing, powerful reactive form builders, and HTTP clients. With recent innovations like Angular Signals, deferrable views, and hydration improvements, Angular combines industrial scalability with modern, fine-grained reactivity.',
+    accentColor: '#e11d48',
+    badgeBg: '#ffe4e6',
+    badgeText: '#be123c',
+    darkBadgeBg: '#4c0519',
+    darkBadgeText: '#fda4af',
+    website: 'https://angular.dev',
+    githubStars: '96k',
+    highlights: ['Built-in Dependency Injection', 'Signals Reactivity', 'Opinionated CLI', 'Enterprise-Grade'],
+  },
+  {
+    id: 'solid',
+    name: 'Solid',
+    icon: '⚡',
+    category: 'UI Library',
+    creator: 'Ryan Carniato',
+    year: 2018,
+    tagline: 'Simple and performant reactivity for building UIs',
+    description:
+      'Solid is an ultra-fast, purely reactive UI library designed to provide developer familiarity with uncompromising performance. While its JSX syntax looks very similar to React, its execution model is fundamentally different: components only run once to wire up reactive dependencies.\n\nInstead of diffing a Virtual DOM on every state update, Solid compiles JSX into surgical DOM mutations linked directly to fine-grained signals. When a signal updates, only the precise text node or attribute subscribed to that signal re-evaluates. This produces blazing-fast render benchmarks and minimal memory footprints.',
+    accentColor: '#4f46e5',
+    badgeBg: '#e0e7ff',
+    badgeText: '#4338ca',
+    darkBadgeBg: '#1e1b4b',
+    darkBadgeText: '#a5b4fc',
+    website: 'https://solidjs.com',
+    githubStars: '32k',
+    highlights: ['Fine-Grained Reactivity', 'No Virtual DOM', 'Ultra High Performance', 'JSX-Based'],
+  },
+  {
+    id: 'vue',
+    name: 'Vue.js',
+    icon: '🟢',
+    category: 'Framework',
+    creator: 'Evan You',
+    year: 2014,
+    tagline: 'The progressive, approachable JavaScript framework',
+    description:
+      'Vue.js is an approachable, performant, and versatile JavaScript framework for building user interfaces on the web. Created by Evan You as an independent open-source project, Vue is renowned for its exceptional documentation and gentle onboarding experience.\n\nVue scales seamlessly between a lightweight progressive library added to an HTML file and a full-featured framework powering mission-critical web applications. With the Composition API, single-file components (.vue files), and a deeply integrated reactivity system based on ES6 Proxies, Vue offers great ergonomics and top-tier runtime efficiency.',
+    accentColor: '#10b981',
+    badgeBg: '#d1fae5',
+    badgeText: '#047857',
+    darkBadgeBg: '#064e3b',
+    darkBadgeText: '#6ee7b7',
+    website: 'https://vuejs.org',
+    githubStars: '208k',
+    highlights: ['Single-File Components', 'Composition API', 'Gentle Learning Curve', 'Flexible Architecture'],
+  },
+  {
+    id: 'svelte',
+    name: 'Svelte',
+    icon: '🧡',
+    category: 'Framework',
+    creator: 'Rich Harris',
+    year: 2016,
+    tagline: 'Cybernetically enhanced web apps with run-time efficiency',
+    description:
+      'Svelte radically rethinks traditional UI framework architectures by shifting the heavy lifting from the browser runtime to build-time compilation. While conventional frameworks interpret application code in the user’s browser, Svelte converts declarative components into compact, optimized imperative JavaScript during the build.\n\nThis compiler-centric approach eliminates the overhead of bundling a heavy virtual DOM engine with your application. With Svelte 5 and its revolutionary Runes system, state management becomes universal and intuitive, enabling lightning-fast load times and smooth transitions across web and mobile browsers.',
+    accentColor: '#f97316',
+    badgeBg: '#ffedd5',
+    badgeText: '#c2410c',
+    darkBadgeBg: '#431407',
+    darkBadgeText: '#fdba74',
+    website: 'https://svelte.dev',
+    githubStars: '79k',
+    highlights: ['Compile-Time Reactivity', 'Runes in Svelte 5', 'Zero Runtime Overhead', 'Concise Syntax'],
+  },
+  {
+    id: 'nextjs',
+    name: 'Next.js',
+    icon: '▲',
+    category: 'Full-Stack',
+    creator: 'Vercel',
+    year: 2016,
+    tagline: 'The React framework for the modern web',
+    description:
+      'Next.js is the premier React meta-framework maintained by Vercel, powering many of the most visited websites on the internet. It bridges the gap between client-side agility and server-side performance by providing hybrid rendering strategies including Server-Side Rendering (SSR), Static Site Generation (SSG), and Incremental Static Regeneration (ISR).\n\nWith the introduction of the App Router, React Server Components (RSC), and Server Actions, Next.js enables developers to co-locate backend data fetching directly within component hierarchies without writing manual API endpoints. Its built-in image, font, and script optimizations ensure top-tier Core Web Vitals scores right out of the box.',
+    accentColor: '#0f172a',
+    badgeBg: '#f1f5f9',
+    badgeText: '#0f172a',
+    darkBadgeBg: '#1e293b',
+    darkBadgeText: '#f8fafc',
+    website: 'https://nextjs.org',
+    githubStars: '128k',
+    highlights: ['App Router & RSC', 'Server Actions', 'Optimized Asset Pipelines', 'Edge & Node.js Runtimes'],
+  },
+  {
+    id: 'nuxt',
+    name: 'Nuxt',
+    icon: '💎',
+    category: 'Full-Stack',
+    creator: 'NuxtLabs',
+    year: 2016,
+    tagline: 'The intuitive Vue framework for full-stack web apps',
+    description:
+      'Nuxt is an open source framework that makes Vue web development intuitive and powerful. Features file-based routing, server rendering, auto-imports, and module ecosystem.',
+    accentColor: '#059669',
+    badgeBg: '#ecfdf5',
+    badgeText: '#065f46',
+    darkBadgeBg: '#064e3b',
+    darkBadgeText: '#6ee7b7',
+    website: 'https://nuxt.com',
+    githubStars: '56k',
+    highlights: ['Auto Imports', 'Nitro Engine Backend', 'Zero-Config SSR', 'Rich Module Ecosystem'],
+  },
+  {
+    id: 'remix',
+    name: 'Remix',
+    icon: '💿',
+    category: 'Full-Stack',
+    creator: 'Shopify',
+    year: 2020,
+    tagline: 'Focused on web standards and snappy user experiences',
+    description:
+      'Remix is a full-stack web framework that lets you focus on user interface and work back through web standards to deliver a fast, slick, and resilient user experience.',
+    accentColor: '#2563eb',
+    badgeBg: '#dbeafe',
+    badgeText: '#1d4ed8',
+    darkBadgeBg: '#172554',
+    darkBadgeText: '#93c5fd',
+    website: 'https://remix.run',
+    githubStars: '29k',
+    highlights: ['Web Standards Centric', 'Nested Routing', 'Optimistic UI', 'Native Form Submissions'],
+  },
+  {
+    id: 'astro',
+    name: 'Astro',
+    icon: '🚀',
+    category: 'Meta-Framework',
+    creator: 'Fred K. Schott',
+    year: 2021,
+    tagline: 'The web framework for content-driven websites',
+    description:
+      'Astro delivers blazingly fast websites by shipping zero client-side JavaScript by default, hydrating interactive UI components on-demand using its Islands architecture.',
+    accentColor: '#8b5cf6',
+    badgeBg: '#ede9fe',
+    badgeText: '#6d28d9',
+    darkBadgeBg: '#2e1065',
+    darkBadgeText: '#c4b5fd',
+    website: 'https://astro.build',
+    githubStars: '48k',
+    highlights: ['Component Islands', 'Zero JS by Default', 'Use Any UI Framework', 'Content Collections'],
+  },
+  {
+    id: 'qwik',
+    name: 'Qwik',
+    icon: '⚡',
+    category: 'Framework',
+    creator: 'Builder.io',
+    year: 2021,
+    tagline: 'Instant-loading web apps with zero hydration',
+    description:
+      'Qwik is a new kind of web framework that delivers instant loading web applications at any scale. It achieves this through Resumability, eliminating hydration completely.',
+    accentColor: '#0284c7',
+    badgeBg: '#e0f2fe',
+    badgeText: '#075985',
+    darkBadgeBg: '#082f49',
+    darkBadgeText: '#7dd3fc',
+    website: 'https://qwik.dev',
+    githubStars: '21k',
+    highlights: ['Resumability (No Hydration)', 'Lazy-Loaded Code Execution', 'Instant Time-To-Interactive', 'Fine-Grained Lazy Execution'],
+  },
+];
