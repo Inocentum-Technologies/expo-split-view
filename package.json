@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit",
     "release": "npm publish --access public",
-    "example": "npm --prefix example start"
+    "example": "npm --prefix example start",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [
     "react-native",
@@ -56,6 +59,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.2.2",
-    "typescript": ">=5.9.2"
+    "typescript": ">=5.9.2",
+    "vitepress": "^2.0.0-alpha.21"
   }
 }
