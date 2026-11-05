@@ -1,4 +1,12 @@
-import { Image, I18nManager, Platform, useColorScheme, type ImageStyle, type StyleProp, ColorValue } from 'react-native';
+import {
+    Image,
+    I18nManager,
+    Platform,
+    useColorScheme,
+    type ColorValue,
+    type ImageStyle,
+    type StyleProp,
+} from 'react-native';
 
 const ICON = Platform.select({
     ios: require('./assets/back-ios.png'),

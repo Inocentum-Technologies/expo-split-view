@@ -15,7 +15,7 @@ import {
 } from 'react';
 import {
     BackHandler,
-    ColorValue,
+    type ColorValue,
     PanResponder,
     Platform,
     Pressable,
@@ -60,10 +60,9 @@ export function useDetailScreenBack(
 
     // Dynamically infer the parent route (e.g. dropping the active child segment) if not explicitly passed
     const defaultFallback = useMemo(() => {
-        if (segments && segments.length > 1) {
+        if (segments.length > 1) {
             // Drops the last segment to target the parent layout/index
-            const parentSegments = segments.slice(0, -1);
-            return `/${parentSegments.join('/')}` as Href;
+            return `/${segments.slice(0, -1).join('/')}` as Href;
         }
         return '/' as Href;
     }, [segments]);
@@ -74,44 +73,24 @@ export function useDetailScreenBack(
     const isIndexRoute = useCallback(
         (routeName: string) => {
             if (!routeName) return false;
-
-            if (userIsMasterRoute) {
-                return userIsMasterRoute(routeName);
-            }
+            if (userIsMasterRoute) return userIsMasterRoute(routeName);
 
             const target = masterRouteName ?? 'index';
-
-            // 1. Direct match with target name
             if (routeName === target) return true;
 
-            // 2. Normalize route by removing search parameters, hashes, and trailing slashes
-            const cleanPath = routeName.split('?')[0].split('#')[0].replace(/\/+$/, '');
-            if (cleanPath === target || cleanPath === '' || (target === 'index' && cleanPath === '/')) {
-                return true;
-            }
-
-            // 3. Match against the leaf segment
+            // Normalize route by stripping search params, hash, and trailing slashes
+            const cleanPath = routeName.split(/[?#]/)[0].replace(/\/+$/, '');
             const pathSegments = cleanPath.split('/').filter(Boolean);
-            if (pathSegments.length > 0 && pathSegments[pathSegments.length - 1] === target) {
-                return true;
-            }
-
-            // 4. Strip route groups in parentheses, e.g. (tabs), (top-tabs), (drawer), (app), etc.
+            // Strip route groups in parentheses, e.g. (tabs), (drawer), (app)
             const nonGroupSegments = pathSegments.filter(
                 (seg) => !(seg.startsWith('(') && seg.endsWith(')'))
             );
-            if (
-                nonGroupSegments.length > 0 &&
-                nonGroupSegments[nonGroupSegments.length - 1] === target
-            ) {
-                return true;
+
+            if (nonGroupSegments.length === 0) {
+                return target === 'index';
             }
 
-            if (target === 'index' && nonGroupSegments.length === 0) {
-                return true;
-            }
-
-            return false;
+            return nonGroupSegments[nonGroupSegments.length - 1] === target;
         },
         [userIsMasterRoute, masterRouteName]
     );
@@ -127,10 +106,9 @@ export function useDetailScreenBack(
     const [, forceUpdate] = useState({});
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('state', () => {
+        return navigation.addListener('state', () => {
             forceUpdate({});
         });
-        return unsubscribe;
     }, [navigation]);
 
     useFocusEffect(
@@ -150,9 +128,7 @@ export function useDetailScreenBack(
     const isTabletAtRoot = isTablet && !navigation.canGoBack();
 
     const handleBack = useCallback(() => {
-        if (navigation.canGoBack()) {
-            router.back();
-        } else if (!isTablet && checkHasIndexInHistory()) {
+        if (navigation.canGoBack() || (!isTablet && checkHasIndexInHistory())) {
             router.back();
         } else if (onFallback) {
             onFallback();
@@ -180,7 +156,7 @@ export function useDetailScreenBack(
                 ? () => (
                     <Pressable
                         onPress={handleBack}
-                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                        hitSlop={12}
                         style={({ pressed }) => [
                             styles.backButton,
                             pressed && styles.backButtonPressed,
@@ -188,7 +164,7 @@ export function useDetailScreenBack(
                         accessibilityRole="button"
                         accessibilityLabel="Back"
                     >
-                        {renderBackIcon ? renderBackIcon({ color: tintColor }) : <BackIcon color={tintColor} />}
+                        {renderBackIcon?.({ color: tintColor }) ?? <BackIcon color={tintColor} />}
                         {Platform.OS === 'ios' && backTitle && (
                             <Text style={[styles.backText, { color: tintColor }]}>
                                 {backTitle}
@@ -274,12 +250,6 @@ const styles = StyleSheet.create({
     },
     backButtonPressed: {
         opacity: 0.5,
-    },
-    backIconText: {
-        fontSize: 20,
-        fontWeight: '600',
-        marginRight: 4,
-        lineHeight: 22,
     },
     backText: {
         fontSize: 17,
