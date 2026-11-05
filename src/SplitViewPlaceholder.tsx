@@ -1,4 +1,4 @@
-import { useTheme } from 'expo-router';
+import { Stack, useTheme } from 'expo-router';
 import { ColorValue, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { SplitViewPlaceholderProps } from './types';
 
@@ -16,33 +16,41 @@ export function SplitViewPlaceholder({
 
     // If phone, render the Master List inside the full-screen stack
     if (!isTablet) {
-        return <>{masterList}</>;
+        return <>
+            <Stack.Screen options={{ headerBackVisible: true }} />
+            {masterList}</>;
     }
 
     // If tablet, render custom placeholder if passed
     if (placeholder) {
-        return <>{placeholder}</>;
+        return <>
+            <Stack.Screen options={{ headerBackVisible: false }} />
+            {placeholder}
+        </>;
     }
 
     // Default right-pane placeholder view before user selects an item
     return (
-        <View
-            style={[
-                styles.container,
-                { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
-                placeholderContainerStyle,
-            ]}
-        >
-            <Text
+        <>
+            <Stack.Screen options={{ headerBackVisible: false }} />
+            <View
                 style={[
-                    styles.text,
-                    { color: (theme?.dark ? '#8E8E93' : '#888888') as ColorValue },
-                    placeholderTextStyle,
+                    styles.container,
+                    { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
+                    placeholderContainerStyle,
                 ]}
             >
-                {placeholderText}
-            </Text>
-        </View>
+                <Text
+                    style={[
+                        styles.text,
+                        { color: (theme?.dark ? '#8E8E93' : '#888888') as ColorValue },
+                        placeholderTextStyle,
+                    ]}
+                >
+                    {placeholderText}
+                </Text>
+            </View>
+        </>
     );
 }
 

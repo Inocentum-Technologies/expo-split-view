@@ -1,7 +1,10 @@
-import { Stack, useTheme } from 'expo-router';
+import { Stack, useNavigation, usePathname, useTheme } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ColorValue, StyleSheet, View, useWindowDimensions } from 'react-native';
 import type { SplitViewProps } from './types';
+import { SplitViewLocationContext } from './SplitViewLocationContext';
+import { useCallback, useEffect, useState } from 'react';
+import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 
 export function SplitView({
     masterList,
@@ -13,6 +16,10 @@ export function SplitView({
     detailStyle,
     stackScreenOptions = { headerShown: true },
     safeAreaEdges = ['left', 'right', 'bottom'],
+    leftHeader = false,
+    leftHeaderTitle,
+    renderBackIcon,
+    leftHeaderHeight,
 }: SplitViewProps) {
     const { width } = useWindowDimensions();
     const theme = useTheme();
@@ -22,6 +29,23 @@ export function SplitView({
     // home-indicator strip) with the theme background so they never show a
     // jarring white/default colour in dark mode.
     const gutterBg = (theme?.colors?.background ?? '#ffffff') as ColorValue;
+
+    // Outer stack: confirmed by your log (routes: ["index", "home"]).
+    const navigation = useNavigation();
+    const pathname = usePathname();
+    const [canGoBack, setCanGoBack] = useState(false);
+
+    useEffect(() => {
+        const update = () => {
+            const s = navigation.getState();
+            setCanGoBack(!!s && s.type === 'stack' && s.index > 0);
+        };
+
+        update(); // after mount, so the state is complete
+        return navigation.addListener('state', update);
+    }, [navigation, pathname]);
+
+    const goBack = useCallback(() => navigation.goBack(), [navigation]);
 
     return (
         // SafeAreaView applies the correct platform insets for the requested edges
@@ -51,7 +75,19 @@ export function SplitView({
                     masterStyle,
                 ]}
             >
-                {masterList}
+                <SplitViewLocationContext.Provider value="sidebar">
+                    {leftHeader === true && (
+                        <SplitViewSidebarHeader
+                            title={leftHeaderTitle}
+                            renderBackIcon={renderBackIcon}
+                            height={leftHeaderHeight}
+                            canGoBack={canGoBack}
+                            onBack={goBack}
+                        />
+                    )}
+                    {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
+                    {masterList}
+                </SplitViewLocationContext.Provider>
             </View>
 
             {/*

@@ -1,9 +1,26 @@
-import type { Href } from 'expo-router';
+import type { Href, NativeStackNavigationOptions } from 'expo-router';
 import type { ReactNode } from 'react';
 import type {
     ColorValue,
     GestureResponderHandlers, StyleProp, TextStyle, ViewStyle,
 } from 'react-native';
+
+export type SplitViewLeftHeaderContext = {
+    /** True when the screen hosting the split view has a previous screen to return to. */
+    canGoBack: boolean;
+    /** Pops the screen hosting the split view. Never pops right-pane screens. */
+    goBack: () => void;
+};
+
+export type SplitViewSidebarHeaderProps = {
+    title?: string;
+    renderBackIcon?: () => ReactNode;
+    /** Tint for the built-in back icon. */
+    backIconColor?: string;
+    height?: number;
+    canGoBack: boolean;
+    onBack: () => void;
+};
 
 export interface SplitViewProps {
     /**
@@ -40,7 +57,7 @@ export interface SplitViewProps {
     /**
      * Default screen options for the auto-rendered `<Stack />` when `children` is not provided.
      */
-    stackScreenOptions?: Record<string, any>;
+    stackScreenOptions?: NativeStackNavigationOptions;
     /**
      * Which safe-area edges `SplitView` should consume via `SafeAreaView`.
      *
@@ -60,6 +77,17 @@ export interface SplitViewProps {
      * Pass an empty array `[]` to opt out entirely when a parent already handles all edges.
      */
     safeAreaEdges?: Array<'top' | 'left' | 'right' | 'bottom'>;
+    /**
+     * Left pane header.
+     * true (default): built-in header with a back button.
+     * false: no header, handle it yourself.
+     * function: render your own header; goBack is already bound to the correct navigator.
+     */
+    leftHeader?: boolean | ((ctx: SplitViewLeftHeaderContext) => ReactNode);
+    leftHeaderTitle?: string;
+    renderBackIcon?: () => ReactNode;
+    leftHeaderHeight?: number;
+    leftHeaderBackIconColor?: string;
 }
 
 export interface SplitViewPlaceholderProps {
