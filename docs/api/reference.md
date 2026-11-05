@@ -34,7 +34,13 @@ import { SplitView } from 'expo-split-view';
 | `containerStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the root container. |
 | `masterStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the master (left) pane wrapper. |
 | `detailStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the detail (right) pane wrapper. |
-| `stackScreenOptions`| `Record<string, any>` | `{ headerShown: true }` | Screen options passed to the underlying Expo Router `<Stack />`. |
+| `stackScreenOptions`| `NativeStackNavigationOptions` | `{ headerShown: true }` | Screen options passed to the underlying Expo Router `<Stack />`. |
+| `safeAreaEdges` | `Array<'top' \| 'left' \| 'right' \| 'bottom'>` | `['left', 'right', 'bottom']` | Safe-area edges consumed by `<SplitView>`. `'top'` is excluded by default to avoid double status-bar padding. |
+| `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderContext) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
+| `leftHeaderTitle` | `string` | `undefined` | Title text displayed in the built-in sidebar header. |
+| `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
+| `leftHeaderHeight` | `number` | `56` | Height in dp of the left sidebar header (excluding safe-area top inset). |
+| `leftHeaderBackIconColor` | `string` | `undefined` | Tint color for the built-in sidebar header back icon. |
 | `children` | `ReactNode` | `undefined` | Custom content for the right pane (overrides `<Stack />`). |
 
 ---
@@ -147,4 +153,22 @@ const {
 | `panHandlers` | `GestureResponderHandlers` | Touch handlers for iOS edge-swipe back gesture. Handled automatically when using `<SplitView.Detail>`. |
 | `isTablet` | `boolean` | `true` if current viewport width >= `tabletBreakpoint`. |
 | `hasIndexInHistory` | `boolean` | `true` if `index` route exists in current stack navigation history. |
+| `isTabletAtRoot` | `boolean` | `true` when on tablet and at the root of the navigation stack. Back is intercepted to return to placeholder/fallback instead of exiting the app. |
+
+---
+
+## Types
+
+### `SplitViewLeftHeaderContext`
+
+Context passed to the `leftHeader` render function:
+
+```tsx
+export type SplitViewLeftHeaderContext = {
+  /** True when the screen hosting the split view has a previous screen to return to. */
+  canGoBack: boolean;
+  /** Pops the screen hosting the split view. Never pops right-pane screens. */
+  goBack: () => void;
+};
+```
 

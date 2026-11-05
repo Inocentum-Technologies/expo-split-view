@@ -10,7 +10,9 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 
 - **Adaptive Split Layout:** Automatically presents a side-by-side master-detail pane on tablets, desktops, and wide viewports, and transitions to a native full-screen stack on mobile phones.
 - **State Preservation Across Form Factors:** Screens and inputs remain mounted when rotating between orientations or unfolding foldable devices. Form input values, search queries, and scroll positions are preserved.
-- **Smart Responsive Navigation (`useSplitView`):** The `navigate` helper automatically executes `router.replace` on tablets (preventing right-pane history stacking) and `router.push` on phones (preserving native back history).
+- **Smart Responsive Navigation (`useSplitView`):** The `navigate` helper automatically executes `router.replace` on tablets (dismissing deep subpages to prevent pile-up) and `router.push` on phones (preserving native back history).
+- **Left Sidebar Header & Outer Back Navigation:** Optional built-in or custom header for the master pane that hooks into the outer navigator (`canGoBack` / `goBack`), safely popping the screen hosting the split view without disturbing right-pane navigation.
+- **Safe Area Inset Management:** Configurable edge insets via `safeAreaEdges` that safely clear landscape cutouts and home indicators while preventing double status-bar top padding in Expo Router stacks.
 - **Resilient Mobile Back Navigation:** Intervenes only on mobile when `router.replace` on a tablet leaves the phone stack without a root `index` screen in history. Automatically injects a header back button, listens to the Android hardware back button, and binds edge-swipe gestures.
 - **Compound Component API:** Provides clean, declarative compound components (`<SplitView>`, `<SplitView.Placeholder>`, `<SplitView.Detail>`) as well as direct named exports.
 - **Expo Go & Web Ready:** Built using standard React Native and Expo Router primitives with zero native build dependencies.
