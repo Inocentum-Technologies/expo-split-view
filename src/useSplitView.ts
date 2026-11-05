@@ -1,41 +1,49 @@
-import { type Href, useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { type Href, useNavigation, useRouter } from 'expo-router';
+import { useCallback, useContext } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { SplitViewLocationContext } from './SplitViewLocationContext';
 import type { UseSplitViewResult } from './types';
 
-/**
- * Hook to simplify responsive navigation in master-detail split views.
- *
- * `navigate(href)` automatically:
- * - Uses `router.replace(href)` on tablets (so right-pane history doesn't pile up).
- * - Uses `router.push(href)` on phones (so the back button naturally pops back to the master list).
- */
 export function useSplitView(breakpoint = 768): UseSplitViewResult {
     const router = useRouter();
+    const navigation = useNavigation();
+    const location = useContext(SplitViewLocationContext);
     const { width } = useWindowDimensions();
     const isTablet = width >= breakpoint;
 
     const navigate = useCallback(
         (href: Href) => {
-            if (isTablet) {
-                // Tablets: If user was navigating within subpages in the detail pane,
-                // dismiss them first so the new item starts clean at the stack root
-                // and previous detail screens/subpages do not linger in history.
-                if (typeof router.canDismiss === 'function' && router.canDismiss()) {
-                    router.dismissAll();
-                }
-                router.replace(href);
-            } else {
-                // Phones: Push to stack normally
+            if (!isTablet) {
                 router.push(href);
+                return;
             }
+
+            // Read inside the callback so the state is never stale.
+            const state = navigation.getState();
+            const pane =
+                location === 'sidebar'
+                    ? state?.routes[state.index]?.state // pane Stack, child of the hosting route
+                    : state; // already inside the pane
+
+            // Pane not mounted yet, or not a stack: push never destroys history.
+            if (!pane || pane.type !== 'stack') {
+                router.push(href);
+                return;
+            }
+
+            const depth = pane.routes.length - 1; // screens above the pane root (index / placeholder)
+
+            if (depth === 0) {
+                router.push(href);
+                return;
+            }
+
+            // The pane is the deepest focused navigator, so these act on it, not the outer stack.
+            if (depth >= 2) router.dismiss(depth - 1);
+            router.replace(href);
         },
-        [isTablet, router]
+        [isTablet, router, navigation, location]
     );
 
-    return {
-        isTablet,
-        width,
-        navigate,
-    };
+    return { isTablet, width, navigate };
 }
