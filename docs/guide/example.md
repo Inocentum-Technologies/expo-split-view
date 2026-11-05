@@ -1,6 +1,6 @@
 # Example App
 
-A responsive demonstration application powered by **Expo Router** and **`expo-split-view`** is located in the [`example/`](https://github.com/Inocentum-Technologies/expo-split-view/tree/main/example) directory.
+A responsive demonstration application powered by **Expo Router** and **`expo-split-view`** is located in the [`example-split-view-root/`](https://github.com/Inocentum-Technologies/expo-split-view/tree/main/example-split-view-root) directory.
 
 This example showcases how `expo-split-view` smoothly transitions between tablet master-detail split layout and mobile full-screen stack navigation with zero state loss and synchronized back navigation.
 
@@ -23,10 +23,10 @@ This example showcases how `expo-split-view` smoothly transitions between tablet
 npm run example
 ```
 
-### Or Directly from the `example/` Directory:
+### Or Directly from the `example-split-view-root/` Directory:
 
 ```bash
-cd example
+cd example-split-view-root
 npm install
 npm start
 ```
@@ -62,7 +62,7 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 - Detail screen in `src/app/(home)/[id].tsx`
 
 ### 2. Smart Navigation (`useSplitView`)
-- Automatically uses `router.replace` on tablets (preventing right-pane history buildup).
+- Automatically uses `router.replace` on tablets (preventing right-pane history buildup) and dismisses nested subpages cleanly when selecting a new item.
 - Automatically uses `router.push` on mobile (preserving native back stack).
 
 ### 3. State Preservation Across Form Factors
@@ -72,15 +72,16 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 
 ### 4. Resilient Mobile Back Navigation (`useDetailScreenBack`)
 - When transitioning from tablet to mobile where `router.replace` left the stack without a root `index`, the hook automatically provides:
-  - Header back button
+  - Header back button with platform-adaptive back icon
   - iOS edge-swipe gesture support
   - Android hardware back button handler
   - Safe fallback route navigation
 
-### 5. Detail Screen Navigation
+### 5. Detail Screen & Subpage Navigation
 - Select any framework to inspect its comprehensive overview, key highlights, metadata, or visit the official framework documentation.
-- Demonstrates that deeper navigation inside the right pane works seamlessly without affecting the master list.
+- Navigate deeper to subpages (`src/app/(home)/subpage.tsx`) inside the right pane. When a different framework is clicked in the master list, `useSplitView` dismisses subpages so the newly selected item starts fresh.
 
-### 6. System Theme Adaptation
+### 6. Edge Inset & Theme Adaptation
+- Uses `safeAreaEdges={['left', 'right']}` to cleanly handle landscape cutouts without adding redundant top padding.
 - Seamlessly adapts between light and dark themes based on system preferences across the master list, search chips, cards, and detail pane.
 

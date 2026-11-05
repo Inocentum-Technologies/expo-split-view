@@ -22,7 +22,7 @@ features:
   - title: State Preservation Across Form Factors
     details: Screens and inputs remain mounted when rotating orientations or unfolding devices. Form inputs, search queries, and scroll positions stay preserved.
   - title: Smart Responsive Navigation
-    details: useSplitView automatically performs router.replace on tablets to prevent right-pane history stacking, and router.push on mobile to preserve back stacks.
+    details: useSplitView automatically performs router.replace and dismisses subpages on tablets to prevent right-pane history buildup, and router.push on mobile to preserve back stacks.
   - title: Resilient Mobile Back Navigation
     details: Gracefully handles transitions from tablet to mobile when router.replace leaves the stack without a root index screen. Injects custom header back button and edge-swipe gestures.
   - title: Compound Component API

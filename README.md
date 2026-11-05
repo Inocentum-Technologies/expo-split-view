@@ -10,7 +10,9 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 
 - **Adaptive Split Layout:** Automatically presents a side-by-side master-detail pane on tablets, desktops, and wide viewports, and transitions to a native full-screen stack on mobile phones.
 - **State Preservation Across Form Factors:** Screens and inputs remain mounted when rotating between orientations or unfolding foldable devices. Form input values, search queries, and scroll positions are preserved.
-- **Smart Responsive Navigation (`useSplitView`):** The `navigate` helper automatically executes `router.replace` on tablets (preventing right-pane history stacking) and `router.push` on phones (preserving native back history).
+- **Smart Responsive Navigation (`useSplitView`):** The `navigate` helper automatically executes `router.replace` on tablets (dismissing any deep subpage history to avoid pile-up) and `router.push` on phones (preserving native back history).
+- **Left Sidebar Header & Outer Back Navigation:** Optional built-in or custom header for the master pane on tablet that coordinates with the outer navigator (`canGoBack` / `goBack`), safely popping the screen hosting the split view without interfering with right-pane navigation.
+- **Safe Area Inset Management:** Configurable edge insets via `safeAreaEdges` that safely clear landscape cutouts and home indicators while preventing double status-bar top padding in Expo Router stacks.
 - **Resilient Mobile Back Navigation:** Intervenes only on mobile when `router.replace` on a tablet leaves the phone stack without a root `index` screen in history. Automatically injects a header back button, listens to the Android hardware back button, and binds edge-swipe gestures.
 - **Compound Component API:** Provides clean, declarative compound components (`<SplitView>`, `<SplitView.Placeholder>`, `<SplitView.Detail>`) as well as direct named exports.
 - **Expo Go & Web Ready:** Built using standard React Native and Expo Router primitives with zero native build dependencies.
@@ -182,11 +184,57 @@ export default function ItemDetailScreen() {
 }
 ```
 
-> See the [`example/`](./example) directory for a complete, runnable master-detail application.
+> See the [`example-split-view-root/`](./example-split-view-root) directory for a complete, runnable master-detail application.
 
 ---
 
 ## Customization
+
+### Left Pane Header & Back Navigation
+
+When `<SplitView>` is nested inside a stack or parent navigator, you can display a header above the left master pane on tablet:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  leftHeader={true}
+  leftHeaderTitle="Frameworks"
+  leftHeaderHeight={56}
+/>
+```
+
+When `leftHeader` is `true`, a built-in header (`SplitViewSidebarHeader`) is rendered with an adaptive platform back button whenever the host screen can go back. Pressing this back button safely calls `goBack()` on the outer navigator—never popping screens inside the right pane.
+
+You can also provide a custom header render function:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  leftHeader={({ canGoBack, goBack }) => (
+    <View style={styles.customHeader}>
+      {canGoBack && (
+        <TouchableOpacity onPress={goBack}>
+          <Text>Back</Text>
+        </TouchableOpacity>
+      )}
+      <Text style={styles.title}>Categories</Text>
+    </View>
+  )}
+/>
+```
+
+### Safe Area Configuration (`safeAreaEdges`)
+
+By default, `<SplitView>` applies safe area padding to `['left', 'right', 'bottom']`.
+
+`'top'` is intentionally excluded by default because Expo Router's `<Stack>` already consumes top insets internally to position its header below the status bar. Adding `'top'` would cause double padding. If you manage custom headers with `headerShown: false`, you can explicitly include `'top'`:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  safeAreaEdges={['left', 'right', 'bottom', 'top']}
+/>
+```
 
 ### Passing Back Options to `<SplitView.Detail>`
 
@@ -267,7 +315,13 @@ Root coordinator placed in your route group's `_layout.tsx`.
 | `containerStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the root container. |
 | `masterStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the master (left) pane wrapper. |
 | `detailStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the detail (right) pane wrapper. |
-| `stackScreenOptions`| `Record<string, any>` | `{ headerShown: true }` | Screen options passed to `<Stack />`. |
+| `stackScreenOptions`| `NativeStackNavigationOptions` | `{ headerShown: true }` | Screen options passed to `<Stack />`. |
+| `safeAreaEdges` | `Array<'top' \| 'left' \| 'right' \| 'bottom'>` | `['left', 'right', 'bottom']` | Safe-area edges consumed by `<SplitView>`. `'top'` is omitted by default to avoid double header padding. |
+| `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderContext) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
+| `leftHeaderTitle` | `string` | `undefined` | Title for the built-in sidebar header. |
+| `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
+| `leftHeaderHeight` | `number` | `56` | Height in dp of the left sidebar header (excluding top inset). |
+| `leftHeaderBackIconColor` | `string` | `undefined` | Tint color for the built-in sidebar header back icon. |
 | `children` | `ReactNode` | `undefined` | Custom content for the right pane (overrides `<Stack />`). |
 
 ---
@@ -342,6 +396,7 @@ Custom hook for detail screens providing resilient back navigation and gestures 
 | `panHandlers` | `GestureResponderHandlers` | Touch handlers for iOS edge-swipe back gesture. Handled automatically when using `<SplitView.Detail>`. |
 | `isTablet` | `boolean` | `true` if current viewport width >= `tabletBreakpoint`. |
 | `hasIndexInHistory` | `boolean` | `true` if `index` route exists in current stack navigation history. |
+| `isTabletAtRoot` | `boolean` | `true` when on tablet and at the root of the navigation stack. Back is intercepted to return to placeholder/fallback instead of exiting the app. |
 
 ---
 

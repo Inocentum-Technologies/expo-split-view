@@ -111,3 +111,65 @@ useDetailScreenBack({
 });
 ```
 
+---
+
+## Left Sidebar Header & Outer Back Navigation
+
+When `<SplitView>` is placed inside a root stack or outer navigator (e.g. navigating from a Home or Dashboard screen into a SplitView screen), tablet users need a way to navigate back to the parent screen.
+
+`<SplitView>` provides a built-in sidebar header that coordinates with the outer navigator:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  leftHeader={true}
+  leftHeaderTitle="Categories"
+  leftHeaderHeight={56}
+  leftHeaderBackIconColor="#007AFF"
+/>
+```
+
+When `leftHeader` is `true`, `<SplitViewSidebarHeader>` automatically monitors the outer navigation stack. If `canGoBack` is true, it displays an adaptive platform back button (iOS chevron / Android arrow). Pressing it pops the host screen—without disturbing any subpages or state in the right-pane detail stack.
+
+### Custom Sidebar Header
+
+You can also pass a render function to `leftHeader` to render custom actions, titles, or search bars:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  leftHeader={({ canGoBack, goBack }) => (
+    <View style={styles.sidebarHeader}>
+      {canGoBack && (
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+          <Text style={styles.backText}>‹</Text>
+        </TouchableOpacity>
+      )}
+      <Text style={styles.sidebarTitle}>Categories</Text>
+    </View>
+  )}
+/>
+```
+
+---
+
+## Safe Area Configuration (`safeAreaEdges`)
+
+`<SplitView>` uses `SafeAreaView` from `react-native-safe-area-context` to safely handle device insets across orientations.
+
+By default, `safeAreaEdges` is set to `['left', 'right', 'bottom']`:
+- **`'left'` & `'right'`**: Clears display cutouts and rounded edges when rotating tablets or phones into landscape mode.
+- **`'bottom'`**: Clears the iOS home indicator strip and Android gesture navigation bar.
+- **`'top'`**: Excluded by default because Expo Router's `<Stack>` automatically manages status-bar top padding. Adding `'top'` by default would cause double padding.
+
+If you are using `headerShown: false` across all screens and managing headers yourself, you can include `'top'`:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  safeAreaEdges={['left', 'right', 'bottom', 'top']}
+/>
+```
+
+Or pass an empty array `[]` if a parent layout container already handles all safe area insets.
+
