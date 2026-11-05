@@ -1,6 +1,6 @@
 {
   "name": "expo-split-view",
-  "version": "0.0.1-beta",
+  "version": "0.0.2-beta",
   "description": "Responsive Master-Detail SplitView for Expo Router with automatic navigation coordination and back gesture handling.",
   "main": "index.ts",
   "types": "index.ts",
@@ -46,8 +46,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "peerDependencies": {
-    "expo": ">=55.0.0",
-    "expo-router": "*",
+    "expo": ">=56.0.0",
+    "expo-router": ">=56.0.0",
     "react": "*",
     "react-native": "*",
     "react-native-safe-area-context": "*"
