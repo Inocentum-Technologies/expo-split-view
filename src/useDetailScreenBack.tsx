@@ -24,12 +24,7 @@ import {
     useWindowDimensions,
 } from 'react-native';
 import type { UseDetailScreenBackOptions, UseDetailBackResult } from './types';
-
-function BackIcon({ color = '#007AFF' }: { color?: ColorValue }) {
-    return <Text style={[styles.backIconText, { color }]}>
-        {'<'}
-    </Text>
-}
+import { BackIcon } from './BackIcon';
 
 /**
  * Custom hook to handle back navigation and gestures in master-detail split layouts.
