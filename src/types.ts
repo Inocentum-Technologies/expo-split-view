@@ -163,7 +163,7 @@ export interface UseDetailScreenBackOptions {
      */
     disableEdgeSwipeGesture?: boolean;
     /**
-     * Custom back icon renderer. Defaults to '<'.
+     * Custom back icon renderer. Defaults to platform-adaptive back icon.
      */
     renderBackIcon?: (props: { color: ColorValue }) => ReactNode;
 }

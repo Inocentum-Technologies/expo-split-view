@@ -1,6 +1,5 @@
 import { useTheme } from 'expo-router';
-import React from 'react';
-import { ColorValue, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ColorValue } from 'react-native';
 import type { SplitViewDetailProps } from './types';
 import { useDetailScreenBack } from './useDetailScreenBack';
 

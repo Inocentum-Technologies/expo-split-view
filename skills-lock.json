@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "simplify": {
+      "source": "LegendApp/legend-skills",
+      "sourceType": "github",
+      "skillPath": "simplify/SKILL.md",
+      "computedHash": "883ab840cba99765debbf83a4d1d15915a00512971bb9ccae03d34191da00f4c"
+    }
+  }
+}

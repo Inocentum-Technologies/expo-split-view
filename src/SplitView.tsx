@@ -1,6 +1,6 @@
 import { Stack, useNavigation, usePathname, useTheme } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ColorValue, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions, type ColorValue } from 'react-native';
 import type { SplitViewProps } from './types';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
 import { useCallback, useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ export function SplitView({
     leftHeaderTitle,
     renderBackIcon,
     leftHeaderHeight,
+    leftHeaderBackIconColor,
 }: SplitViewProps) {
     const { width } = useWindowDimensions();
     const theme = useTheme();
@@ -80,6 +81,7 @@ export function SplitView({
                         <SplitViewSidebarHeader
                             title={leftHeaderTitle}
                             renderBackIcon={renderBackIcon}
+                            backIconColor={leftHeaderBackIconColor}
                             height={leftHeaderHeight}
                             canGoBack={canGoBack}
                             onBack={goBack}

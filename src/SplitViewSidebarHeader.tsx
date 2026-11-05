@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { ColorValue, I18nManager, Platform, Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View, type ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SplitViewSidebarHeaderProps } from './types';
 import { BackIcon } from './BackIcon';
