@@ -4,7 +4,6 @@ import {
     useNavigation,
     useRouter,
     useSegments,
-    useTheme,
 } from 'expo-router';
 import {
     useCallback,
@@ -15,7 +14,6 @@ import {
 } from 'react';
 import {
     BackHandler,
-    type ColorValue,
     PanResponder,
     Platform,
     Pressable,
@@ -44,7 +42,7 @@ export function useDetailScreenBack(
         backTitle = 'Back',
         showHeaderButton = true,
         renderBackIcon,
-        tintColor: userTintColor,
+        tintColor,
         masterRouteName,
         isMasterRoute: userIsMasterRoute,
         onFallback,
@@ -53,7 +51,6 @@ export function useDetailScreenBack(
 
     const router = useRouter();
     const navigation = useNavigation();
-    const theme = useTheme();
     const segments = useSegments();
     const { width } = useWindowDimensions();
     const isTablet = width >= tabletBreakpoint;
@@ -137,13 +134,6 @@ export function useDetailScreenBack(
         }
     }, [navigation, isTablet, checkHasIndexInHistory, router, onFallback, targetFallback]);
 
-    // Adaptive header tint color: user-specified color > theme colors > platform fallback
-    const tintColor: ColorValue = userTintColor ?? (
-        Platform.OS === 'ios'
-            ? ((theme?.colors?.primary as ColorValue) || (theme?.dark ? '#0A84FF' : '#007AFF'))
-            : ((theme?.colors?.text as ColorValue) || (theme?.dark ? '#FFFFFF' : '#111827'))
-    );
-
     // 1. Header Back Button
     useLayoutEffect(() => {
         if (!showHeaderButton) return;
@@ -166,7 +156,12 @@ export function useDetailScreenBack(
                     >
                         {renderBackIcon?.({ color: tintColor }) ?? <BackIcon color={tintColor} />}
                         {Platform.OS === 'ios' && backTitle && (
-                            <Text style={[styles.backText, { color: tintColor }]}>
+                            <Text
+                                style={[
+                                    styles.backText,
+                                    tintColor ? { color: tintColor } : undefined,
+                                ]}
+                            >
                                 {backTitle}
                             </Text>
                         )}

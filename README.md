@@ -380,12 +380,12 @@ Custom hook for detail screens providing resilient back navigation and gestures 
 | `tabletBreakpoint` | `number` | `768` | Viewport width threshold (in points) for tablet layout. |
 | `backTitle` | `string \| null` | `'Back'` | Back button label on iOS (pass `""` or `null` to hide). |
 | `showHeaderButton` | `boolean` | `true` | Automatically inject custom back button when required. |
-| `tintColor` | `ColorValue` | `theme color` | Custom tint color for back chevron and text (defaults to active navigation theme). |
+| `tintColor` | `ColorValue` | `theme-adaptive` | Custom tint color for back chevron and text (defaults to black in light mode and white in dark mode). |
 | `masterRouteName` | `string` | `'index'` | Name of the master list route to search for in navigation history. |
 | `isMasterRoute` | `(routeName: string) => boolean` | `undefined` | Custom predicate function to match the master list screen in stack history. |
 | `onFallback` | `() => void` | `undefined` | Custom callback invoked on fallback navigation (e.g. for custom modals or bottom sheets). |
 | `disableEdgeSwipeGesture` | `boolean` | `false` | Disable edge-swipe back gesture handling (e.g. inside swipeable tabs or bottom sheets). |
-| `renderBackIcon` | `(props: { color: ColorValue }) => ReactNode` | `undefined` | Custom back icon renderer (defaults to chevron `<`). |
+| `renderBackIcon` | `(props: { color?: ColorValue }) => ReactNode` | `undefined` | Custom back icon renderer (defaults to chevron `<`). |
 
 #### Return Value (`UseDetailBackResult`)
 

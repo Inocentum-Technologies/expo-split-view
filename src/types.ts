@@ -142,7 +142,7 @@ export interface UseDetailScreenBackOptions {
     showHeaderButton?: boolean;
     /**
      * Custom tint color for the back button, chevron, and title text.
-     * Defaults to the theme primary color (iOS) or text color (Android/other).
+     * Defaults to black in light mode and white in dark mode.
      */
     tintColor?: ColorValue;
     /**
@@ -165,7 +165,7 @@ export interface UseDetailScreenBackOptions {
     /**
      * Custom back icon renderer. Defaults to platform-adaptive back icon.
      */
-    renderBackIcon?: (props: { color: ColorValue }) => ReactNode;
+    renderBackIcon?: (props: { color?: ColorValue }) => ReactNode;
 }
 
 export interface UseDetailBackResult {
