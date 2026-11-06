@@ -5,6 +5,10 @@ hero:
   name: "expo-split-view"
   text: "Adaptive Master-Detail Split-View"
   tagline: Seamless tablet split layout and full-screen mobile stack navigation for Expo Router with zero state loss.
+  image:
+    src: /splitview-demo.gif
+    alt: Banner
+    width: 560
   actions:
     - theme: brand
       text: Get Started

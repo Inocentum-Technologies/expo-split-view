@@ -1,8 +1,41 @@
+<div align="center">
+
 # expo-split-view
+
+**Split-view layouts for Expo apps, built for [expo-router](https://docs.expo.dev/router/introduction/).**
+
+[![npm version](https://img.shields.io/npm/v/expo-split-view?style=flat-square&logo=npm&color=cb3837)](https://www.npmjs.com/package/expo-split-view)
+[![npm downloads (monthly)](https://img.shields.io/npm/dm/expo-split-view?style=flat-square&logo=npm)](https://www.npmjs.com/package/expo-split-view)
+[![npm total downloads](https://img.shields.io/npm/dt/expo-split-view?style=flat-square&logo=npm&label=total%20downloads)](https://www.npmjs.com/package/expo-split-view)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Inocentum-Technologies/expo-split-view/release.yml?branch=main&style=flat-square&logo=github)](https://github.com/Inocentum-Technologies/expo-split-view/actions)
+[![License](https://img.shields.io/npm/l/expo-split-view?style=flat-square)](./LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Inocentum-Technologies/expo-split-view?style=flat-square&logo=github)](https://github.com/Inocentum-Technologies/expo-split-view/stargazers)
+[![Docs](https://img.shields.io/badge/docs-hosted-blue?style=flat-square&logo=readthedocs&logoColor=white)](https://inocentum-technologies.github.io/expo-split-view/)
+[![Expo Router](https://img.shields.io/badge/expo--router-only-000020?style=flat-square&logo=expo)](https://docs.expo.dev/router/introduction/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/Inocentum-Technologies/expo-split-view/pulls)
+
+<img src="./assets/splitview-banner.png" alt="Split view in action" width="600" />
+
+[**Documentation**](https://inocentum-technologies.github.io/expo-split-view/) ·
+[**Report a Bug**](https://github.com/Inocentum-Technologies/expo-split-view/issues) ·
+[**Request a Feature**](https://github.com/Inocentum-Technologies/expo-split-view/issues)
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> This module works with **expo-router only**. `react-navigation` (standalone) is not supported.
 
 Adaptive master-detail split-view architecture for **Expo Router**. Seamlessly transitions between tablet master-detail layout and full-screen mobile stack navigation without unmounting components or losing state.
 
 Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the box with zero native build dependencies.
+
+## 📖 Documentation
+
+Full documentation, API reference, and guides are hosted here:
+
+👉 **https://inocentum-technologies.github.io/expo-split-view/**
 
 ---
 
@@ -19,11 +52,9 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 
 ---
 
-## Example UI
+## Demo
 
-| Tablet / Desktop Split View (`width >= 768`) | Mobile Stack View (`width < 768`) | Split View in Action |
-| :---: | :---: | :---: |
-| <img src="./assets/tablet-split-view.png" alt="Tablet Split View" width="550" /> | <img src="./assets/mobile-stack-view.png" alt="Mobile Stack View" width="260" /> | <video src="./assets/expo-split-view-tablet-switch.webm" alt="Split view in action" width="600" controls="true" /> |
+<img src="./assets/splitview-demo.gif" alt="Split view in action" width="600" /> 
 
 ---
 

@@ -9,8 +9,6 @@ This guide demonstrates how to set up `expo-split-view` in an Expo Router applic
 - Nested inside a drawer at `app/(drawer)/items/`
 :::
 
----
-
 ## File Structure
 
 A standard file structure for a split-view route group looks like this:
@@ -25,8 +23,6 @@ app/
 components/
   MasterList.tsx      <-- Shared master list with useSplitView()
 ```
-
----
 
 ## Step-by-Step Implementation
 
@@ -116,8 +112,6 @@ export default function ItemDetailScreen() {
   );
 }
 ```
-
----
 
 ## Next Steps
 

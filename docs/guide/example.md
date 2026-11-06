@@ -4,17 +4,6 @@ A responsive demonstration application powered by **Expo Router** and **`expo-sp
 
 This example showcases how `expo-split-view` smoothly transitions between tablet master-detail split layout and mobile full-screen stack navigation with zero state loss and synchronized back navigation.
 
-| Tablet / Desktop Split View (`width >= 768`) | Mobile Stack View (`width < 768`) |
-| :---: | :---: |
-| <img src="/tablet-split-view.png" alt="Tablet Split View" width="550" /> | <img src="/mobile-stack-view.png" alt="Mobile Stack View" width="260" /> |
-
----
-
-| Split View in Action |
-| :---: |
-| <video src="/expo-split-view-tablet-switch.webm" alt="Split view in action" width="600" controls="true" /> |
----
-
 ## Quick Start
 
 ### From the Root Directory:
@@ -36,7 +25,6 @@ Press:
 - **`i`** to open in iOS Simulator
 - **`a`** to open in Android Emulator
 
----
 
 ## How to Test Responsive Split View
 
@@ -51,8 +39,6 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 
 ### 3. Android Emulator
 - Run on a tablet emulator, phone emulator, or foldable device.
-
----
 
 ## What This Example Demonstrates
 

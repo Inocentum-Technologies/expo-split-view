@@ -2,7 +2,6 @@
 
 `expo-split-view` exposes compound components as well as direct named exports and hooks.
 
----
 
 ## Available Exports
 
@@ -16,7 +15,6 @@
 | `useDetailScreenBack(options)` | Hook | Configures header back button, Android back handler, and edge-swipe gesture. |
 | `useCustomLeftHeader()` | Hook | Hook for master list components in the left pane to access `{ canGoBack, goBack }`. |
 
----
 
 ## `<SplitView />`
 
@@ -45,7 +43,6 @@ import { SplitView } from 'expo-split-view';
 | `leftHeaderBackIconColor` | `string` | `undefined` | Tint color for the built-in sidebar header back icon. |
 | `children` | `ReactNode` | `undefined` | Custom content for the right pane (overrides `<Stack />`). |
 
----
 
 ## `<SplitView.Placeholder />`
 
@@ -68,7 +65,6 @@ import { SplitViewPlaceholder } from 'expo-split-view';
 | `placeholderContainerStyle` | `StyleProp<ViewStyle>` | `undefined` | Style for the tablet placeholder container. |
 | `placeholderTextStyle` | `StyleProp<TextStyle>` | `undefined` | Style for the tablet placeholder text. |
 
----
 
 ## `<SplitView.Detail />`
 
@@ -88,7 +84,6 @@ import { SplitViewDetail } from 'expo-split-view';
 | `style` | `StyleProp<ViewStyle>` | `undefined` | Container view style. |
 | `backOptions` | `UseDetailScreenBackOptions` | `undefined` | Configuration options passed directly to `useDetailScreenBack`. |
 
----
 
 ## `useSplitView()`
 
@@ -112,7 +107,6 @@ const { isTablet, width, navigate } = useSplitView(breakpoint?);
 | `width` | `number` | Current screen width in points / dp. |
 | `navigate` | `(href: Href) => void` | Navigates to a detail route: uses `router.replace(href)` on tablet and `router.push(href)` on phone. |
 
----
 
 ## `useDetailScreenBack()`
 
@@ -157,7 +151,6 @@ const {
 | `hasIndexInHistory` | `boolean` | `true` if `index` route exists in current stack navigation history. |
 | `isTabletAtRoot` | `boolean` | `true` when on tablet and at the root of the navigation stack. Back is intercepted to return to placeholder/fallback instead of exiting the app. |
 
----
 
 ## `useCustomLeftHeader()`
 
@@ -180,7 +173,6 @@ const { canGoBack, goBack } = useCustomLeftHeader();
 Outside the left sidebar (for example, on phones where `MasterList` is rendered in the root index screen), it safely returns `{ canGoBack: false, goBack: () => {} }`.
 :::
 
----
 
 ## `<BackIcon />`
 
@@ -200,7 +192,6 @@ import { BackIcon } from 'expo-split-view';
 | `size` | `number` | `22 (iOS) / 24 (other)` | Rendered icon size in dp. |
 | `style` | `StyleProp<ImageStyle>` | `undefined` | Additional styles applied to the icon image. |
 
----
 
 ## Types
 

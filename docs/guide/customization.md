@@ -1,8 +1,5 @@
 # Customization
-
 Customize the placeholder, header back navigation, and gestures to fit your design system.
-
----
 
 ## Passing Back Options to `<SplitView.Detail>`
 
@@ -40,8 +37,6 @@ const styles = StyleSheet.create({
   },
 });
 ```
-
----
 
 ## Custom Tablet Placeholder Component
 
@@ -92,8 +87,6 @@ const styles = StyleSheet.create({
 });
 ```
 
----
-
 ## Custom Header Back Icon
 
 Provide a custom icon renderer to `renderBackIcon` in `useDetailScreenBack` (or in `backOptions`):
@@ -110,8 +103,6 @@ useDetailScreenBack({
   ),
 });
 ```
-
----
 
 ## Left Sidebar Header & Outer Back Navigation
 
@@ -192,8 +183,6 @@ const styles = StyleSheet.create({
 ```
 
 On tablet, `canGoBack` is `true` when the screen hosting the split view has a previous screen in the outer navigator. On mobile (or outside the left pane), `canGoBack` is `false` and `goBack` is a safe no-op.
-
----
 
 ## Safe Area Configuration (`safeAreaEdges`)
 

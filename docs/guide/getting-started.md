@@ -4,8 +4,6 @@
 
 Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the box with zero native build dependencies.
 
----
-
 ## Features
 
 - **Adaptive Split Layout:** Automatically presents a side-by-side master-detail pane on tablets, desktops, and wide viewports, and transitions to a native full-screen stack on mobile phones.
@@ -16,8 +14,6 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 - **Resilient Mobile Back Navigation:** Intervenes only on mobile when `router.replace` on a tablet leaves the phone stack without a root `index` screen in history. Automatically injects a header back button, listens to the Android hardware back button, and binds edge-swipe gestures.
 - **Compound Component API:** Provides clean, declarative compound components (`<SplitView>`, `<SplitView.Placeholder>`, `<SplitView.Detail>`) as well as direct named exports.
 - **Expo Go & Web Ready:** Built using standard React Native and Expo Router primitives with zero native build dependencies.
-
----
 
 ## Installation
 
@@ -38,8 +34,6 @@ Add the config plugin to your `app.json` to automatically enable iPad / tablet m
   }
 }
 ```
-
----
 
 ## How It Works
 
