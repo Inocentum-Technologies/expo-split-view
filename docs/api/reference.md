@@ -11,8 +11,10 @@
 | `<SplitView>` | Component | Root layout component (renders left master pane and right `<Stack />`). |
 | `<SplitView.Placeholder>` / `SplitViewPlaceholder` | Component | Displays master list on phone, placeholder on tablet. |
 | `<SplitView.Detail>` / `SplitViewDetail` | Component | Detail screen container with auto-bound edge-swipe gestures. |
+| `<BackIcon>` / `BackIcon` | Component | Platform-adaptive back icon with automatic RTL handling and theme support. |
 | `useSplitView(breakpoint?)` | Hook | Provides `{ isTablet, width, navigate(href) }`. |
 | `useDetailScreenBack(options)` | Hook | Configures header back button, Android back handler, and edge-swipe gesture. |
+| `useCustomLeftHeader()` | Hook | Hook for master list components in the left pane to access `{ canGoBack, goBack }`. |
 
 ---
 
@@ -36,7 +38,7 @@ import { SplitView } from 'expo-split-view';
 | `detailStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the detail (right) pane wrapper. |
 | `stackScreenOptions`| `NativeStackNavigationOptions` | `{ headerShown: true }` | Screen options passed to the underlying Expo Router `<Stack />`. |
 | `safeAreaEdges` | `Array<'top' \| 'left' \| 'right' \| 'bottom'>` | `['left', 'right', 'bottom']` | Safe-area edges consumed by `<SplitView>`. `'top'` is excluded by default to avoid double status-bar padding. |
-| `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderContext) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
+| `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderValueProps) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
 | `leftHeaderTitle` | `string` | `undefined` | Title text displayed in the built-in sidebar header. |
 | `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
 | `leftHeaderHeight` | `number` | `56` | Height in dp of the left sidebar header (excluding safe-area top inset). |
@@ -157,18 +159,75 @@ const {
 
 ---
 
-## Types
+## `useCustomLeftHeader()`
 
-### `SplitViewLeftHeaderContext`
-
-Context passed to the `leftHeader` render function:
+Custom hook for master list components rendered inside the left pane. Use together with `leftHeader={false}` (default) on `<SplitView>` to build your own custom header or back navigation inside the master list.
 
 ```tsx
-export type SplitViewLeftHeaderContext = {
+import { useCustomLeftHeader } from 'expo-split-view';
+
+const { canGoBack, goBack } = useCustomLeftHeader();
+```
+
+### Return Value (`SplitViewLeftHeaderValueProps`)
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `canGoBack` | `boolean` | `true` when the screen hosting the split view has a previous screen in the outer navigator. |
+| `goBack` | `() => void` | Safely pops the screen hosting the split view (never pops right-pane screens). |
+
+::: info Behavior Outside Sidebar
+Outside the left sidebar (for example, on phones where `MasterList` is rendered in the root index screen), it safely returns `{ canGoBack: false, goBack: () => {} }`.
+:::
+
+---
+
+## `<BackIcon />`
+
+Reusable platform-adaptive back icon component rendering iOS chevron (`back-ios.png`) or Android arrow (`back-android.png`) based on `Platform.OS`. Automatically handles RTL mirroring via `I18nManager.isRTL` and adapts to light/dark color schemes.
+
+```tsx
+import { BackIcon } from 'expo-split-view';
+
+<BackIcon color="#007AFF" size={24} />
+```
+
+### Props (`BackIconProps`)
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `ColorValue` | `theme-adaptive` | Tint color. Defaults to black in light mode (`#000000`) and white in dark mode (`#FFFFFF`). |
+| `size` | `number` | `22 (iOS) / 24 (other)` | Rendered icon size in dp. |
+| `style` | `StyleProp<ImageStyle>` | `undefined` | Additional styles applied to the icon image. |
+
+---
+
+## Types
+
+### `SplitViewLeftHeaderValueProps`
+
+Context value passed to the `leftHeader` render function and returned by `useCustomLeftHeader()`:
+
+```tsx
+export type SplitViewLeftHeaderValueProps = {
   /** True when the screen hosting the split view has a previous screen to return to. */
   canGoBack: boolean;
   /** Pops the screen hosting the split view. Never pops right-pane screens. */
   goBack: () => void;
+};
+```
+
+### `BackIconProps`
+
+Props accepted by `<BackIcon />`:
+
+```tsx
+export type BackIconProps = {
+  /** Tint color. Defaults to black in light mode and white in dark mode. */
+  color?: ColorValue;
+  /** Rendered size in dp. Defaults to 22 on iOS and 24 elsewhere. */
+  size?: number;
+  style?: StyleProp<ImageStyle>;
 };
 ```
 

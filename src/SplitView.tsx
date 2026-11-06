@@ -3,8 +3,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View, useWindowDimensions, type ColorValue } from 'react-native';
 import type { SplitViewProps } from './types';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
+import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
 
 export function SplitView({
     masterList,
@@ -48,6 +49,9 @@ export function SplitView({
 
     const goBack = useCallback(() => navigation.goBack(), [navigation]);
 
+    // after canGoBack and goBack are defined
+    const leftHeaderValue = useMemo(() => ({ canGoBack, goBack }), [canGoBack, goBack]);
+
     return (
         // SafeAreaView applies the correct platform insets for the requested edges
         // automatically — no manual useSafeAreaInsets math required.
@@ -77,18 +81,20 @@ export function SplitView({
                 ]}
             >
                 <SplitViewLocationContext.Provider value="sidebar">
-                    {leftHeader === true && (
-                        <SplitViewSidebarHeader
-                            title={leftHeaderTitle}
-                            renderBackIcon={renderBackIcon}
-                            backIconColor={leftHeaderBackIconColor}
-                            height={leftHeaderHeight}
-                            canGoBack={canGoBack}
-                            onBack={goBack}
-                        />
-                    )}
-                    {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
-                    {masterList}
+                    <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
+                        {leftHeader === true && (
+                            <SplitViewSidebarHeader
+                                title={leftHeaderTitle}
+                                renderBackIcon={renderBackIcon}
+                                backIconColor={leftHeaderBackIconColor}
+                                height={leftHeaderHeight}
+                                canGoBack={canGoBack}
+                                onBack={goBack}
+                            />
+                        )}
+                        {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
+                        {masterList}
+                    </SplitViewLeftHeaderContext.Provider>
                 </SplitViewLocationContext.Provider>
             </View>
 

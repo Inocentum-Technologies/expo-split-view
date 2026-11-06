@@ -5,7 +5,7 @@ import type {
     GestureResponderHandlers, StyleProp, TextStyle, ViewStyle,
 } from 'react-native';
 
-export type SplitViewLeftHeaderContext = {
+export type SplitViewLeftHeaderValueProps = {
     /** True when the screen hosting the split view has a previous screen to return to. */
     canGoBack: boolean;
     /** Pops the screen hosting the split view. Never pops right-pane screens. */
@@ -83,7 +83,7 @@ export interface SplitViewProps {
      * false: no header, handle it yourself.
      * function: render your own header; goBack is already bound to the correct navigator.
      */
-    leftHeader?: boolean | ((ctx: SplitViewLeftHeaderContext) => ReactNode);
+    leftHeader?: boolean | ((ctx: SplitViewLeftHeaderValueProps) => ReactNode);
     leftHeaderTitle?: string;
     renderBackIcon?: () => ReactNode;
     leftHeaderHeight?: number;
