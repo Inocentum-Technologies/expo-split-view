@@ -1,8 +1,5 @@
 # Customization
-
 Customize the placeholder, header back navigation, and gestures to fit your design system.
-
----
 
 ## Passing Back Options to `<SplitView.Detail>`
 
@@ -40,8 +37,6 @@ const styles = StyleSheet.create({
   },
 });
 ```
-
----
 
 ## Custom Tablet Placeholder Component
 
@@ -92,8 +87,6 @@ const styles = StyleSheet.create({
 });
 ```
 
----
-
 ## Custom Header Back Icon
 
 Provide a custom icon renderer to `renderBackIcon` in `useDetailScreenBack` (or in `backOptions`):
@@ -110,8 +103,6 @@ useDetailScreenBack({
   ),
 });
 ```
-
----
 
 ## Left Sidebar Header & Outer Back Navigation
 
@@ -151,7 +142,47 @@ You can also pass a render function to `leftHeader` to render custom actions, ti
 />
 ```
 
----
+### Custom Header in Master List (`useCustomLeftHeader`)
+
+When building a custom header directly inside your `MasterList` component (or when leaving `leftHeader={false}`), use the `useCustomLeftHeader()` hook to access the outer navigator's back state:
+
+```tsx
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useCustomLeftHeader, BackIcon } from 'expo-split-view';
+
+export function MasterList() {
+  const { canGoBack, goBack } = useCustomLeftHeader();
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        {canGoBack && (
+          <TouchableOpacity onPress={goBack} hitSlop={8} style={styles.backButton}>
+            <BackIcon />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>Categories</Text>
+      </View>
+      {/* Master list items */}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    height: 56,
+  },
+  backButton: { marginRight: 8 },
+  title: { fontSize: 18, fontWeight: '600' },
+});
+```
+
+On tablet, `canGoBack` is `true` when the screen hosting the split view has a previous screen in the outer navigator. On mobile (or outside the left pane), `canGoBack` is `false` and `goBack` is a safe no-op.
 
 ## Safe Area Configuration (`safeAreaEdges`)
 

@@ -1,8 +1,41 @@
+<div align="center">
+
 # expo-split-view
+
+**Split-view layouts for Expo apps, built for [expo-router](https://docs.expo.dev/router/introduction/).**
+
+[![npm version](https://img.shields.io/npm/v/expo-split-view?style=flat-square&logo=npm&color=cb3837)](https://www.npmjs.com/package/expo-split-view)
+[![npm downloads (monthly)](https://img.shields.io/npm/dm/expo-split-view?style=flat-square&logo=npm)](https://www.npmjs.com/package/expo-split-view)
+[![npm total downloads](https://img.shields.io/npm/dt/expo-split-view?style=flat-square&logo=npm&label=total%20downloads)](https://www.npmjs.com/package/expo-split-view)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Inocentum-Technologies/expo-split-view/release.yml?branch=main&style=flat-square&logo=github)](https://github.com/Inocentum-Technologies/expo-split-view/actions)
+[![License](https://img.shields.io/npm/l/expo-split-view?style=flat-square)](./LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Inocentum-Technologies/expo-split-view?style=flat-square&logo=github)](https://github.com/Inocentum-Technologies/expo-split-view/stargazers)
+[![Docs](https://img.shields.io/badge/docs-hosted-blue?style=flat-square&logo=readthedocs&logoColor=white)](https://inocentum-technologies.github.io/expo-split-view/)
+[![Expo Router](https://img.shields.io/badge/expo--router-only-000020?style=flat-square&logo=expo)](https://docs.expo.dev/router/introduction/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/Inocentum-Technologies/expo-split-view/pulls)
+
+<img src="./assets/splitview-banner.png" alt="Split view in action" width="600" />
+
+[**Documentation**](https://inocentum-technologies.github.io/expo-split-view/) ·
+[**Report a Bug**](https://github.com/Inocentum-Technologies/expo-split-view/issues) ·
+[**Request a Feature**](https://github.com/Inocentum-Technologies/expo-split-view/issues)
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> This module works with **expo-router only**. `react-navigation` (standalone) is not supported.
 
 Adaptive master-detail split-view architecture for **Expo Router**. Seamlessly transitions between tablet master-detail layout and full-screen mobile stack navigation without unmounting components or losing state.
 
 Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the box with zero native build dependencies.
+
+## 📖 Documentation
+
+Full documentation, API reference, and guides are hosted here:
+
+👉 **https://inocentum-technologies.github.io/expo-split-view/**
 
 ---
 
@@ -19,11 +52,9 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 
 ---
 
-## Example UI
+## Demo
 
-| Tablet / Desktop Split View (`width >= 768`) | Mobile Stack View (`width < 768`) | Split View in Action |
-| :---: | :---: | :---: |
-| <img src="./assets/tablet-split-view.png" alt="Tablet Split View" width="550" /> | <img src="./assets/mobile-stack-view.png" alt="Mobile Stack View" width="260" /> | <video src="./assets/expo-split-view-tablet-switch.webm" alt="Split view in action" width="600" controls="true" /> |
+<img src="./assets/splitview-demo.gif" alt="Split view in action" width="600" /> 
 
 ---
 
@@ -223,6 +254,34 @@ You can also provide a custom header render function:
 />
 ```
 
+#### Custom Header in Master List (`useCustomLeftHeader`)
+
+When building a custom header directly inside your `MasterList` component (or when `leftHeader={false}`), use the `useCustomLeftHeader()` hook to access the outer navigator's back state:
+
+```tsx
+import { useCustomLeftHeader, BackIcon } from 'expo-split-view';
+
+export function MasterList() {
+  const { canGoBack, goBack } = useCustomLeftHeader();
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        {canGoBack && (
+          <TouchableOpacity onPress={goBack} hitSlop={8}>
+            <BackIcon />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>Categories</Text>
+      </View>
+      {/* List items */}
+    </View>
+  );
+}
+```
+
+On tablet, `canGoBack` is `true` when the host screen has a parent route to pop in the outer navigator. On mobile (or outside the left pane), `canGoBack` defaults to `false` and `goBack` is a no-op, allowing the same `MasterList` component to be reused across both form factors seamlessly.
+
 ### Safe Area Configuration (`safeAreaEdges`)
 
 By default, `<SplitView>` applies safe area padding to `['left', 'right', 'bottom']`.
@@ -296,8 +355,10 @@ Components can be used via compound syntax (`<SplitView>`, `<SplitView.Placehold
 | `<SplitView>` | Component | Root layout component (renders left pane and right `<Stack />`). |
 | `<SplitView.Placeholder>` / `SplitViewPlaceholder` | Component | Displays master list on phone, placeholder on tablet. |
 | `<SplitView.Detail>` / `SplitViewDetail` | Component | Detail screen container with auto-bound edge-swipe gestures. |
+| `<BackIcon>` / `BackIcon` | Component | Platform-adaptive back icon with automatic RTL handling and theme support. |
 | `useSplitView(breakpoint?)` | Hook | Provides `{ isTablet, width, navigate(href) }`. |
 | `useDetailScreenBack(options)` | Hook | Configures header back button, Android back handler, and edge-swipe gesture. |
+| `useCustomLeftHeader()` | Hook | Hook for master list components in the left pane to access `{ canGoBack, goBack }`. |
 
 ---
 
@@ -317,7 +378,7 @@ Root coordinator placed in your route group's `_layout.tsx`.
 | `detailStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the detail (right) pane wrapper. |
 | `stackScreenOptions`| `NativeStackNavigationOptions` | `{ headerShown: true }` | Screen options passed to `<Stack />`. |
 | `safeAreaEdges` | `Array<'top' \| 'left' \| 'right' \| 'bottom'>` | `['left', 'right', 'bottom']` | Safe-area edges consumed by `<SplitView>`. `'top'` is omitted by default to avoid double header padding. |
-| `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderContext) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
+| `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderValueProps) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
 | `leftHeaderTitle` | `string` | `undefined` | Title for the built-in sidebar header. |
 | `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
 | `leftHeaderHeight` | `number` | `56` | Height in dp of the left sidebar header (excluding top inset). |
@@ -380,12 +441,12 @@ Custom hook for detail screens providing resilient back navigation and gestures 
 | `tabletBreakpoint` | `number` | `768` | Viewport width threshold (in points) for tablet layout. |
 | `backTitle` | `string \| null` | `'Back'` | Back button label on iOS (pass `""` or `null` to hide). |
 | `showHeaderButton` | `boolean` | `true` | Automatically inject custom back button when required. |
-| `tintColor` | `ColorValue` | `theme color` | Custom tint color for back chevron and text (defaults to active navigation theme). |
+| `tintColor` | `ColorValue` | `theme-adaptive` | Custom tint color for back chevron and text (defaults to black in light mode and white in dark mode). |
 | `masterRouteName` | `string` | `'index'` | Name of the master list route to search for in navigation history. |
 | `isMasterRoute` | `(routeName: string) => boolean` | `undefined` | Custom predicate function to match the master list screen in stack history. |
 | `onFallback` | `() => void` | `undefined` | Custom callback invoked on fallback navigation (e.g. for custom modals or bottom sheets). |
 | `disableEdgeSwipeGesture` | `boolean` | `false` | Disable edge-swipe back gesture handling (e.g. inside swipeable tabs or bottom sheets). |
-| `renderBackIcon` | `(props: { color: ColorValue }) => ReactNode` | `undefined` | Custom back icon renderer (defaults to chevron `<`). |
+| `renderBackIcon` | `(props: { color?: ColorValue }) => ReactNode` | `undefined` | Custom back icon renderer (defaults to chevron `<`). |
 
 #### Return Value (`UseDetailBackResult`)
 
@@ -397,6 +458,79 @@ Custom hook for detail screens providing resilient back navigation and gestures 
 | `isTablet` | `boolean` | `true` if current viewport width >= `tabletBreakpoint`. |
 | `hasIndexInHistory` | `boolean` | `true` if `index` route exists in current stack navigation history. |
 | `isTabletAtRoot` | `boolean` | `true` when on tablet and at the root of the navigation stack. Back is intercepted to return to placeholder/fallback instead of exiting the app. |
+
+---
+
+### `useCustomLeftHeader()`
+
+Custom hook for master list components rendered inside the left pane. Use together with `leftHeader={false}` (default) on `<SplitView>` to build your own custom header or back navigation inside the master list.
+
+```tsx
+import { useCustomLeftHeader } from 'expo-split-view';
+
+const { canGoBack, goBack } = useCustomLeftHeader();
+```
+
+#### Return Value (`SplitViewLeftHeaderValueProps`)
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `canGoBack` | `boolean` | `true` when the screen hosting the split view has a previous screen in the outer navigator. |
+| `goBack` | `() => void` | Safely pops the screen hosting the split view (never pops right-pane screens). |
+
+> [!NOTE]
+> Outside the left sidebar (for example, on phones where `MasterList` is rendered in the root index screen), it safely returns `{ canGoBack: false, goBack: () => {} }`.
+
+---
+
+### `<BackIcon />`
+
+Reusable platform-adaptive back icon component rendering iOS chevron (`back-ios.png`) or Android arrow (`back-android.png`) based on `Platform.OS`. Automatically handles RTL mirroring via `I18nManager.isRTL` and adapts to light/dark color schemes.
+
+```tsx
+import { BackIcon } from 'expo-split-view';
+
+<BackIcon color="#007AFF" size={24} />
+```
+
+#### Props (`BackIconProps`)
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `ColorValue` | `theme-adaptive` | Tint color. Defaults to black in light mode (`#000000`) and white in dark mode (`#FFFFFF`). |
+| `size` | `number` | `22 (iOS) / 24 (other)` | Rendered icon size in dp. |
+| `style` | `StyleProp<ImageStyle>` | `undefined` | Additional styles applied to the icon image. |
+
+---
+
+## Types
+
+### `SplitViewLeftHeaderValueProps`
+
+Context value passed to the `leftHeader` render function and returned by `useCustomLeftHeader()`:
+
+```tsx
+export type SplitViewLeftHeaderValueProps = {
+  /** True when the screen hosting the split view has a previous screen to return to. */
+  canGoBack: boolean;
+  /** Pops the screen hosting the split view. Never pops right-pane screens. */
+  goBack: () => void;
+};
+```
+
+### `BackIconProps`
+
+Props accepted by `<BackIcon />`:
+
+```tsx
+export type BackIconProps = {
+  /** Tint color. Defaults to black in light mode and white in dark mode. */
+  color?: ColorValue;
+  /** Rendered size in dp. Defaults to 22 on iOS and 24 elsewhere. */
+  size?: number;
+  style?: StyleProp<ImageStyle>;
+};
+```
 
 ---
 

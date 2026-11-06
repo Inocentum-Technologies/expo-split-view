@@ -27,7 +27,7 @@ export function SplitViewPlaceholder({
     // If tablet, render custom placeholder if passed, else default placeholder view
     return (
         <>
-            <Stack.Screen options={{ headerBackVisible: false }} />
+            <Stack.Screen options={{ headerBackVisible: false, headerLeft: () => null }} />
             {placeholder ?? (
                 <View
                     style={[

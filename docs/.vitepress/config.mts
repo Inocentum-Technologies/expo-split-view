@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "expo-split-view",
   description: "Adaptive master-detail split-view architecture for Expo Router",
-  head: [['link', { rel: 'icon', href: 'favicon.ico' }]],
+  head: [['link', { rel: 'icon', href: '/expo-split-view/favicon.ico' }]],
   base: "/expo-split-view",
   themeConfig: {
     logo: 'logo.png',
@@ -40,5 +40,6 @@ export default defineConfig({
       message: 'Released under the MIT License.',
       copyright: 'Copyright © Inocentum Technologies'
     }
-  }
+  },
+  lastUpdated: true
 })

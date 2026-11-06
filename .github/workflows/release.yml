@@ -1,27 +1,22 @@
-name: Release
+name: Publish Package
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
   id-token: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  release:
+  publish:
     name: Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -31,48 +26,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false # never use caching in release builds
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build lib
-        run: npm run build
+        run: npm run build --if-present
 
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-        run: npm run release
-
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-
-          # Detect existing tag format (with or without 'v' prefix)
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            TAG="v$VERSION"
-          elif git rev-parse "$VERSION" >/dev/null 2>&1; then
-            TAG="$VERSION"
-          else
-            TAG="v$VERSION"
-          fi
-
-          EXTRA_ARGS=()
-          if [[ "$VERSION" == *"-"* ]]; then
-            EXTRA_ARGS+=(--prerelease)
-          fi
-
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "GitHub release for $TAG already exists."
-          else
-            gh release create "$TAG" \
-              --title "$TAG" \
-              --generate-notes \
-              --target "${{ github.sha }}" \
-              "${EXTRA_ARGS[@]}"
-          fi
+        run: npm publish

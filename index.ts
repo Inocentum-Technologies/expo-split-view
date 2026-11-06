@@ -8,6 +8,9 @@ export * from './src/SplitViewPlaceholder';
 export * from './src/SplitViewDetail';
 export * from './src/useSplitView';
 export * from './src/useDetailScreenBack';
+export * from './src/useCustomLeftHeader';
+export * from './src/SplitViewLeftHeaderContext';
+export * from './src/BackIcon';
 
 /**
  * Compound component for SplitView layout.
