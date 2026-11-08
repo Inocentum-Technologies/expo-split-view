@@ -115,12 +115,17 @@ When `<SplitView>` is placed inside a root stack or outer navigator (e.g. naviga
   masterList={<MasterList />}
   leftHeader={true}
   leftHeaderTitle="Categories"
-  leftHeaderHeight={56}
   leftHeaderBackIconColor="#007AFF"
+  leftHeaderTitleAlign="left" // optional: defaults to 'center' on iOS and 'left' on Android/Web
+  leftHeaderTitleStyle={{ fontWeight: '700' }}
+  leftHeaderStyle={{ backgroundColor: '#fcfcfc' }}
 />
 ```
 
-When `leftHeader` is `true`, `<SplitViewSidebarHeader>` automatically monitors the outer navigation stack. If `canGoBack` is true, it displays an adaptive platform back button (iOS chevron / Android arrow). Pressing it pops the host screen—without disturbing any subpages or state in the right-pane detail stack.
+When `leftHeader` is `true`, `<SplitView>` automatically monitors the outer navigation stack:
+- **Outer Back Navigation**: If `canGoBack` is true, an adaptive platform back button (iOS chevron / Android arrow) is displayed. Pressing it safely pops the host screen in the outer navigator without disturbing right-pane detail screens or history.
+- **Platform-Adaptive Sizing**: The sidebar header height automatically conforms to native platform guidelines (50dp on iPad, 44dp on iPhone, and 64dp on Android/Web) while accounting for safe-area top insets. Override with `leftHeaderHeight` if needed.
+- **Platform-Adaptive Alignment**: Titles default to center alignment on iOS and left alignment on Android and Web, conforming to platform conventions. Override with `leftHeaderTitleAlign`.
 
 ### Custom Sidebar Header
 

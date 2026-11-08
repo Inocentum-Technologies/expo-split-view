@@ -15,34 +15,6 @@ export interface SplitViewLeftHeaderValueProps {
     goBack: () => void;
 }
 
-export interface SplitViewSidebarHeaderProps {
-    /** Title text to display in the header. */
-    title?: string;
-    /** Custom back icon renderer. Defaults to platform-adaptive back icon. */
-    renderBackIcon?: () => ReactNode;
-    /** Tint for the built-in back icon. */
-    backIconColor?: ColorValue;
-    /**
-     * Height in dp of the sidebar header (excluding safe-area top inset).
-     * Defaults to 50 on iPad (44 on iPhone), and 64 on Android and Web.
-     */
-    height?: number;
-    canGoBack: boolean;
-    onBack: () => void;
-    /**
-     * Title alignment. Defaults to 'center' on iOS, and 'left' on Android and Web.
-     */
-    titleAlign?: 'left' | 'center';
-    /**
-     * Style override for the title text.
-     */
-    titleStyle?: StyleProp<TextStyle>;
-    /**
-     * Style override for the header container.
-     */
-    headerStyle?: StyleProp<ViewStyle>;
-}
-
 export interface SplitViewProps {
     /**
      * The master list component or element to render.
