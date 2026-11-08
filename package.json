@@ -1,6 +1,6 @@
 {
   "name": "expo-split-view",
-  "version": "0.0.3-rc.1",
+  "version": "0.0.3-rc.2",
   "description": "Responsive Master-Detail SplitView for Expo Router with automatic navigation coordination and back gesture handling.",
   "main": "index.ts",
   "types": "index.ts",
