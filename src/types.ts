@@ -2,33 +2,54 @@ import type { Href, NativeStackNavigationOptions } from 'expo-router';
 import type { ReactNode } from 'react';
 import type {
     ColorValue,
-    GestureResponderHandlers, StyleProp, TextStyle, ViewStyle,
+    GestureResponderHandlers,
+    StyleProp,
+    TextStyle,
+    ViewStyle,
 } from 'react-native';
 
-export type SplitViewLeftHeaderValueProps = {
+export interface SplitViewLeftHeaderValueProps {
     /** True when the screen hosting the split view has a previous screen to return to. */
     canGoBack: boolean;
     /** Pops the screen hosting the split view. Never pops right-pane screens. */
     goBack: () => void;
-};
+}
 
-export type SplitViewSidebarHeaderProps = {
+export interface SplitViewSidebarHeaderProps {
+    /** Title text to display in the header. */
     title?: string;
+    /** Custom back icon renderer. Defaults to platform-adaptive back icon. */
     renderBackIcon?: () => ReactNode;
     /** Tint for the built-in back icon. */
-    backIconColor?: string;
+    backIconColor?: ColorValue;
+    /**
+     * Height in dp of the sidebar header (excluding safe-area top inset).
+     * Defaults to 50 on iPad (44 on iPhone), and 64 on Android and Web.
+     */
     height?: number;
     canGoBack: boolean;
     onBack: () => void;
-};
+    /**
+     * Title alignment. Defaults to 'center' on iOS, and 'left' on Android and Web.
+     */
+    titleAlign?: 'left' | 'center';
+    /**
+     * Style override for the title text.
+     */
+    titleStyle?: StyleProp<TextStyle>;
+    /**
+     * Style override for the header container.
+     */
+    headerStyle?: StyleProp<ViewStyle>;
+}
 
 export interface SplitViewProps {
     /**
-   * The master list component or element to render.
-   * On tablet screens, this is visible in the left pane.
-   * On phone screens, this stays mounted but is hidden with zero width,
-   * allowing the Stack to natively manage the full-screen view.
-   */
+     * The master list component or element to render.
+     * On tablet screens, this is visible in the left pane.
+     * On phone screens, this stays mounted but is hidden with zero width,
+     * allowing the Stack to natively manage the full-screen view.
+     */
     masterList: ReactNode;
     /**
      * Custom children to render in the right pane instead of the default `<Stack />`.
@@ -76,18 +97,38 @@ export interface SplitViewProps {
      *
      * Pass an empty array `[]` to opt out entirely when a parent already handles all edges.
      */
-    safeAreaEdges?: Array<'top' | 'left' | 'right' | 'bottom'>;
+    safeAreaEdges?: ('top' | 'left' | 'right' | 'bottom')[];
     /**
      * Left pane header.
-     * true (default): built-in header with a back button.
-     * false: no header, handle it yourself.
-     * function: render your own header; goBack is already bound to the correct navigator.
+     * - `false` (default): no header.
+     * - `true`: built-in header with a back button.
+     * - function: render your own header; `goBack` is already bound to the correct navigator.
      */
     leftHeader?: boolean | ((ctx: SplitViewLeftHeaderValueProps) => ReactNode);
+    /** Title text for the built-in left sidebar header. */
     leftHeaderTitle?: string;
+    /** Custom back icon renderer for the built-in left sidebar header. */
     renderBackIcon?: () => ReactNode;
+    /**
+     * Height in dp of the left sidebar header (excluding safe-area top inset).
+     * Defaults to 50 on iPad (44 on iPhone), and 64 on Android and Web.
+     */
     leftHeaderHeight?: number;
-    leftHeaderBackIconColor?: string;
+    /** Tint color for the built-in left sidebar header back icon. */
+    leftHeaderBackIconColor?: ColorValue;
+    /**
+     * Title alignment for the built-in sidebar header.
+     * Defaults to 'center' on iOS, and 'left' on Android and Web.
+     */
+    leftHeaderTitleAlign?: 'left' | 'center';
+    /**
+     * Style override for the built-in sidebar header title.
+     */
+    leftHeaderTitleStyle?: StyleProp<TextStyle>;
+    /**
+     * Style override for the built-in sidebar header container.
+     */
+    leftHeaderStyle?: StyleProp<ViewStyle>;
 }
 
 export interface SplitViewPlaceholderProps {

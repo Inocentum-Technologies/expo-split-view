@@ -22,6 +22,9 @@ export function SplitView({
     renderBackIcon,
     leftHeaderHeight,
     leftHeaderBackIconColor,
+    leftHeaderTitleAlign,
+    leftHeaderTitleStyle,
+    leftHeaderStyle,
 }: SplitViewProps) {
     const { width } = useWindowDimensions();
     const theme = useTheme();
@@ -90,6 +93,9 @@ export function SplitView({
                                 height={leftHeaderHeight}
                                 canGoBack={canGoBack}
                                 onBack={goBack}
+                                titleAlign={leftHeaderTitleAlign}
+                                titleStyle={leftHeaderTitleStyle}
+                                headerStyle={leftHeaderStyle}
                             />
                         )}
                         {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}

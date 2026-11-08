@@ -6,6 +6,7 @@ export * from './src/types';
 export * from './src/SplitView';
 export * from './src/SplitViewPlaceholder';
 export * from './src/SplitViewDetail';
+export * from './src/SplitViewSidebarHeader';
 export * from './src/useSplitView';
 export * from './src/useDetailScreenBack';
 export * from './src/useCustomLeftHeader';
