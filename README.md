@@ -230,11 +230,17 @@ When `<SplitView>` is nested inside a stack or parent navigator, you can display
   masterList={<MasterList />}
   leftHeader={true}
   leftHeaderTitle="Frameworks"
-  leftHeaderHeight={56}
+  leftHeaderBackIconColor="#007AFF"
+  leftHeaderTitleAlign="left" // optional override; defaults to 'center' on iOS and 'left' on Android/Web
+  leftHeaderTitleStyle={{ fontWeight: '700' }}
+  leftHeaderStyle={{ backgroundColor: '#ffffff' }}
 />
 ```
 
-When `leftHeader` is `true`, a built-in header (`SplitViewSidebarHeader`) is rendered with an adaptive platform back button whenever the host screen can go back. Pressing this back button safely calls `goBack()` on the outer navigator—never popping screens inside the right pane.
+When `leftHeader` is `true`, a built-in sidebar header is rendered with an adaptive platform back button whenever the host screen can go back. Pressing this back button safely calls `goBack()` on the outer navigator—never popping screens inside the right pane.
+- **Platform-Adaptive Sizing**: Header height automatically conforms to native platform conventions (50dp on iPad, 44dp on iPhone, 64dp on Android/Web) and handles top safe-area insets.
+- **Platform-Adaptive Alignment**: Titles default to center alignment on iOS and left alignment on Android and Web.
+- **Custom Styling**: Fully customizable via `leftHeaderHeight`, `leftHeaderTitleAlign`, `leftHeaderTitleStyle`, and `leftHeaderStyle`.
 
 You can also provide a custom header render function:
 
@@ -382,7 +388,7 @@ Root coordinator placed in your route group's `_layout.tsx`.
 | `leftHeaderTitle` | `string` | `undefined` | Title for the built-in sidebar header. |
 | `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
 | `leftHeaderHeight` | `number` | `iOS: 50 (iPad) / 44, Android/Web: 64` | Height in dp of the left sidebar header (excluding top inset). |
-| `leftHeaderBackIconColor` | `string` | `undefined` | Tint color for the built-in sidebar header back icon. |
+| `leftHeaderBackIconColor` | `ColorValue` | `undefined` | Tint color for the built-in sidebar header back icon. |
 | `leftHeaderTitleAlign` | `'left' \| 'center'` | `iOS: 'center', Android/Web: 'left'` | Title alignment for the built-in sidebar header. |
 | `leftHeaderTitleStyle` | `StyleProp<TextStyle>` | `undefined` | Custom style for the built-in sidebar header title. |
 | `leftHeaderStyle` | `StyleProp<ViewStyle>` | `undefined` | Custom style for the built-in sidebar header container. |

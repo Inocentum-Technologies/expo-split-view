@@ -40,7 +40,7 @@ import { SplitView } from 'expo-split-view';
 | `leftHeaderTitle` | `string` | `undefined` | Title text displayed in the built-in sidebar header. |
 | `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
 | `leftHeaderHeight` | `number` | `iOS: 50 (iPad) / 44, Android/Web: 64` | Height in dp of the left sidebar header (excluding safe-area top inset). |
-| `leftHeaderBackIconColor` | `string` | `undefined` | Tint color for the built-in sidebar header back icon. |
+| `leftHeaderBackIconColor` | `ColorValue` | `undefined` | Tint color for the built-in sidebar header back icon. |
 | `leftHeaderTitleAlign` | `'left' \| 'center'` | `iOS: 'center', Android/Web: 'left'` | Title alignment for the built-in sidebar header. |
 | `leftHeaderTitleStyle` | `StyleProp<TextStyle>` | `undefined` | Custom style for the built-in sidebar header title. |
 | `leftHeaderStyle` | `StyleProp<ViewStyle>` | `undefined` | Custom style for the built-in sidebar header container. |

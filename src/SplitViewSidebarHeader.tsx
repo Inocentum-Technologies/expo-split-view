@@ -6,11 +6,26 @@ import {
     View,
     useColorScheme,
     type ColorValue,
+    type StyleProp,
+    type TextStyle,
+    type ViewStyle,
 } from 'react-native';
+import type { ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from 'expo-router';
-import type { SplitViewSidebarHeaderProps } from './types';
 import { BackIcon } from './BackIcon';
+
+export interface SplitViewSidebarHeaderProps {
+    title?: string;
+    renderBackIcon?: () => ReactNode;
+    backIconColor?: ColorValue;
+    height?: number;
+    canGoBack: boolean;
+    onBack: () => void;
+    titleAlign?: 'left' | 'center';
+    titleStyle?: StyleProp<TextStyle>;
+    headerStyle?: StyleProp<ViewStyle>;
+}
 
 const ANDROID_RIPPLE = {
     borderless: true,
