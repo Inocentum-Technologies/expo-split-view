@@ -1,12 +1,11 @@
-# expo-split-view Example App
+# expo-split-view Example App (Root Layout)
 
 A responsive master-detail demonstration app powered by **Expo Router** and **`expo-split-view`**.
 
 This example showcases how `expo-split-view` smoothly transitions between tablet master-detail split layout and mobile full-screen stack navigation with zero state loss and synchronized back navigation.
 
-| Tablet / Desktop Split View (`width >= 768`) | Mobile Stack View (`width < 768`) |
-| :---: | :---: |
-| <img src="../assets/tablet-split-view.png" alt="Tablet Split View" width="550" /> | <img src="../assets/mobile-stack-view.png" alt="Mobile Stack View" width="260" /> |
+> [!TIP]
+> Looking for an example of a split view nested inside a parent navigator with sidebar header back navigation? See the [`example-split-view-nested`](../example-split-view-nested) app (`npm run example:nested`).
 
 ---
 
@@ -15,13 +14,13 @@ This example showcases how `expo-split-view` smoothly transitions between tablet
 ### From the Root Directory:
 
 ```bash
-npm run example
+npm run example:root
 ```
 
-### Or Directly from the `example/` Directory:
+### Or Directly from the `example-split-view-root/` Directory:
 
 ```bash
-cd example
+cd example-split-view-root
 npm install
 npm start
 ```

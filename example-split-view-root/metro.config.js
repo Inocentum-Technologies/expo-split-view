@@ -9,7 +9,7 @@ const config = getDefaultConfig(projectRoot);
 // 1. Watch parent module source
 config.watchFolders = [workspaceRoot];
 
-// 2. Resolve modules exclusively from example/node_modules
+// 2. Resolve modules exclusively from example-split-view-root/node_modules
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
 ];

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Expo Split View Example",
-    "slug": "expo-split-view-example",
+    "name": "Expo Split View Example (Root)",
+    "slug": "expo-split-view-example-root",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
-    "scheme": "exposplitview",
+    "scheme": "exposplitviewroot",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
