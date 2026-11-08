@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit",
     "release": "npm publish --access public",
-    "example": "npm --prefix example-split-view-root start",
+    "example:root": "npm --prefix example-split-view-root start -- -c",
+    "example:nested": "npm --prefix example-split-view-nested start -- -c",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"

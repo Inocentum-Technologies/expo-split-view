@@ -9,8 +9,11 @@ This example showcases how `expo-split-view` smoothly transitions between tablet
 ### From the Root Directory:
 
 ```bash
-npm run example
+npm run example:root
 ```
+
+> [!TIP]
+> To run the nested split-view example, use `npm run example:nested`. See [`example-split-view-nested`](https://github.com/Inocentum-Technologies/expo-split-view/tree/main/example-split-view-nested).
 
 ### Or Directly from the `example-split-view-root/` Directory:
 

@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Expo Split View Example (Nested)",
+    "slug": "expo-split-view-example-nested",
+    "scheme": "exposplitviewnested",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-split-view"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

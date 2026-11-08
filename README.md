@@ -215,7 +215,7 @@ export default function ItemDetailScreen() {
 }
 ```
 
-> See the [`example-split-view-root/`](./example-split-view-root) directory for a complete, runnable master-detail application.
+> See the [`example-split-view-root/`](./example-split-view-root) and [`example-split-view-nested/`](./example-split-view-nested) directories for complete, runnable demonstration applications.
 
 ---
 
@@ -530,6 +530,41 @@ export type BackIconProps = {
   size?: number;
   style?: StyleProp<ImageStyle>;
 };
+```
+
+---
+
+## Example Applications
+
+This repository includes two runnable demonstration apps showcasing different layout patterns:
+
+| Example | Layout Pattern | Description | Run Command |
+| :--- | :--- | :--- | :--- |
+| [`example-split-view-root`](./example-split-view-root) | Root Master-Detail | Standalone master-detail split layout showcasing category filters, search query preservation, and responsive transitions. | `npm run example:root` |
+| [`example-split-view-nested`](./example-split-view-nested) | Nested Split View | Split view nested inside an outer stack navigator (Dashboard → Employees) demonstrating left sidebar header back navigation, multi-screen right-pane stacks, and bottom sheets. | `npm run example:nested` |
+
+### Running from the Root Directory
+
+```bash
+# Run root split-view example
+npm run example:root
+
+# Run nested split-view example
+npm run example:nested
+```
+
+### Running from an Example Directory
+
+```bash
+# Root example
+cd example-split-view-root
+npm install
+npm start
+
+# Nested example
+cd example-split-view-nested
+npm install
+npm start
 ```
 
 ---
