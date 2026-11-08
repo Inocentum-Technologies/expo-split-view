@@ -381,8 +381,11 @@ Root coordinator placed in your route group's `_layout.tsx`.
 | `leftHeader` | `boolean \| ((ctx: SplitViewLeftHeaderValueProps) => ReactNode)` | `false` | Left pane header. `true` renders built-in header with back button; a function lets you render custom header controls. |
 | `leftHeaderTitle` | `string` | `undefined` | Title for the built-in sidebar header. |
 | `renderBackIcon` | `() => ReactNode` | `undefined` | Custom back icon renderer for the built-in sidebar header. |
-| `leftHeaderHeight` | `number` | `56` | Height in dp of the left sidebar header (excluding top inset). |
+| `leftHeaderHeight` | `number` | `iOS: 50 (iPad) / 44, Android/Web: 64` | Height in dp of the left sidebar header (excluding top inset). |
 | `leftHeaderBackIconColor` | `string` | `undefined` | Tint color for the built-in sidebar header back icon. |
+| `leftHeaderTitleAlign` | `'left' \| 'center'` | `iOS: 'center', Android/Web: 'left'` | Title alignment for the built-in sidebar header. |
+| `leftHeaderTitleStyle` | `StyleProp<TextStyle>` | `undefined` | Custom style for the built-in sidebar header title. |
+| `leftHeaderStyle` | `StyleProp<ViewStyle>` | `undefined` | Custom style for the built-in sidebar header container. |
 | `children` | `ReactNode` | `undefined` | Custom content for the right pane (overrides `<Stack />`). |
 
 ---
