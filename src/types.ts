@@ -20,7 +20,8 @@ export interface SplitViewProps {
      * The master list component or element to render.
      * On tablet screens, this is visible in the left pane.
      * On phone screens, this stays mounted but is hidden with zero width,
-     * allowing the Stack to natively manage the full-screen view.
+     * allowing the Stack to natively manage the full-screen view
+     * (unless `unmountMasterOnPhone` is set).
      */
     masterList: ReactNode;
     /**
@@ -31,6 +32,22 @@ export interface SplitViewProps {
      * Width of the master pane on tablet in dp. Defaults to 320.
      */
     masterListWidth?: number;
+    /**
+     * When `true`, the left pane (master list and left header) is unmounted on phone
+     * screens instead of being kept mounted but hidden.
+     *
+     * By default the master list is mounted twice on phones: once hidden in the left pane
+     * and once by `<SplitView.Placeholder>` inside the stack, so its effects, subscriptions
+     * and data fetching run twice. Enabling this removes the hidden copy.
+     *
+     * Trade-off: state held by the sidebar copy of the master list (scroll position,
+     * search text, etc.) is lost when the layout crosses the tablet breakpoint
+     * (for example on rotation or window resize), because the pane remounts when it
+     * becomes visible again.
+     *
+     * Defaults to `false` (previous behavior).
+     */
+    unmountMasterOnPhone?: boolean;
     /**
      * Minimum screen width (in points) for tablet layout. Defaults to 768.
      */

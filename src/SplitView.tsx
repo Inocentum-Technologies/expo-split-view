@@ -16,6 +16,7 @@ export function SplitView({
     masterList,
     children,
     masterListWidth = 320,
+    unmountMasterOnPhone = false,
     tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
     containerStyle,
     masterStyle,
@@ -34,6 +35,11 @@ export function SplitView({
     const { width } = useWindowDimensions();
     const theme = useTheme();
     const isTablet = width >= tabletBreakpoint;
+
+    // By default the left pane stays mounted (hidden) on phones to preserve its state.
+    // With `unmountMasterOnPhone` it is removed entirely, so the master list is only
+    // mounted once (by SplitView.Placeholder inside the stack).
+    const showLeftPane = isTablet || !unmountMasterOnPhone;
 
     // Fill all safe-area padding gutters (status-bar strip, camera-cutout gap,
     // home-indicator strip) with the theme background so they never show a
@@ -72,44 +78,47 @@ export function SplitView({
             style={[styles.container, { backgroundColor: gutterBg }, containerStyle]}
         >
             {/*
-                The Master pane stays mounted at all times to preserve component states.
+                The Master pane stays mounted at all times to preserve component states
+                (unless `unmountMasterOnPhone` is set).
                 On tablet, it sits on the left with fixed width.
                 On phone, it is hidden with display: 'none' and width: 0.
                 SafeAreaView's left-edge inset pushes the entire row, so the left
                 pane naturally starts after the camera cutout — no width math needed.
             */}
-            <View
-                style={[
-                    styles.leftPane,
-                    {
-                        borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
-                        backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
-                        width: masterListWidth,
-                    },
-                    !isTablet && styles.hiddenPane,
-                    masterStyle,
-                ]}
-            >
-                <SplitViewLocationContext.Provider value="sidebar">
-                    <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
-                        {leftHeader === true && (
-                            <SplitViewSidebarHeader
-                                title={leftHeaderTitle}
-                                renderBackIcon={renderBackIcon}
-                                backIconColor={leftHeaderBackIconColor}
-                                height={leftHeaderHeight}
-                                canGoBack={canGoBack}
-                                onBack={goBack}
-                                titleAlign={leftHeaderTitleAlign}
-                                titleStyle={leftHeaderTitleStyle}
-                                headerStyle={leftHeaderStyle}
-                            />
-                        )}
-                        {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
-                        {masterList}
-                    </SplitViewLeftHeaderContext.Provider>
-                </SplitViewLocationContext.Provider>
-            </View>
+            {showLeftPane && (
+                <View
+                    style={[
+                        styles.leftPane,
+                        {
+                            borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
+                            backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
+                            width: masterListWidth,
+                        },
+                        !isTablet && styles.hiddenPane,
+                        masterStyle,
+                    ]}
+                >
+                    <SplitViewLocationContext.Provider value="sidebar">
+                        <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
+                            {leftHeader === true && (
+                                <SplitViewSidebarHeader
+                                    title={leftHeaderTitle}
+                                    renderBackIcon={renderBackIcon}
+                                    backIconColor={leftHeaderBackIconColor}
+                                    height={leftHeaderHeight}
+                                    canGoBack={canGoBack}
+                                    onBack={goBack}
+                                    titleAlign={leftHeaderTitleAlign}
+                                    titleStyle={leftHeaderTitleStyle}
+                                    headerStyle={leftHeaderStyle}
+                                />
+                            )}
+                            {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
+                            {masterList}
+                        </SplitViewLeftHeaderContext.Provider>
+                    </SplitViewLocationContext.Provider>
+                </View>
+            )}
 
             {/*
                 The Detail pane holds the active screens.
