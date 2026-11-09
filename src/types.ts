@@ -100,7 +100,7 @@ export interface SplitViewProps {
     renderBackIcon?: () => ReactNode;
     /**
      * Height in dp of the left sidebar header (excluding safe-area top inset).
-     * Defaults to 50 on iPad (44 on iPhone), and 64 on Android and Web.
+     * Defaults to 50 on iPad (44 on iPhone portrait, 32 in landscape), and 64 on Android tablets (56 on Android phones).
      */
     leftHeaderHeight?: number;
     /** Tint color for the built-in left sidebar header back icon. */

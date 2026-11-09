@@ -5,6 +5,7 @@ import {
     Text,
     View,
     useColorScheme,
+    useWindowDimensions,
     type ColorValue,
     type StyleProp,
     type TextStyle,
@@ -71,14 +72,21 @@ export function SplitViewSidebarHeader({
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const scheme = useColorScheme();
+    const { width, height: windowHeight } = useWindowDimensions();
     const isIOS = Platform.OS === 'ios';
 
-    // Standard native stack header heights: 50 on iPad (44 on iPhone), 64 on Android and Web (Material 3).
-    const isPad = Platform.OS === 'ios' && Platform.isPad;
-    const defaultHeight = Platform.select({
-        ios: isPad ? 50 : 44,
-        default: 64,
-    });
+    // Standard native stack header heights:
+    // - iPad: 50
+    // - iPhone: 44 in portrait, 32 in landscape (compact UINavigationBar)
+    // - Android tablet (sw600dp): 64 (Material 3 TopAppBar)
+    // - Android phone: 56
+    const isLandscape = width > windowHeight;
+    const isTabletDevice = Math.min(width, windowHeight) >= 600;
+    const isPad = Platform.OS === 'ios' && (Platform.isPad || isTabletDevice);
+
+    const defaultHeight = isIOS
+        ? (isPad ? 50 : isLandscape ? 32 : 44)
+        : (isTabletDevice ? 64 : 56);
     const resolvedHeight = height ?? defaultHeight;
 
     // Standard native stack title alignment: center on iOS, left on Android/Web.
