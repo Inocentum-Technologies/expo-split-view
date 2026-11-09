@@ -32,6 +32,31 @@ const ANDROID_RIPPLE = {
     radius: 24,
 };
 
+interface BackButtonProps {
+    isIOS: boolean;
+    hitSlop: number;
+    onPress: () => void;
+    children: ReactNode;
+}
+
+function BackButton({ isIOS, hitSlop, onPress, children }: BackButtonProps) {
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={hitSlop}
+            onPress={onPress}
+            style={({ pressed }) => [
+                isIOS ? styles.iosBackButton : styles.androidBackButton,
+                pressed && (isIOS ? styles.iosButtonPressed : styles.androidButtonPressed),
+            ]}
+            android_ripple={!isIOS ? ANDROID_RIPPLE : undefined}
+        >
+            {children}
+        </Pressable>
+    );
+}
+
 export function SplitViewSidebarHeader({
     title,
     renderBackIcon,
@@ -49,7 +74,7 @@ export function SplitViewSidebarHeader({
     const isIOS = Platform.OS === 'ios';
 
     // Standard native stack header heights: 50 on iPad (44 on iPhone), 64 on Android and Web (Material 3).
-    const isPad = isIOS && (Platform as { isPad?: boolean }).isPad;
+    const isPad = Platform.OS === 'ios' && Platform.isPad;
     const defaultHeight = Platform.select({
         ios: isPad ? 50 : 44,
         default: 64,
@@ -68,6 +93,8 @@ export function SplitViewSidebarHeader({
 
     const titlePlatformStyle = isIOS ? styles.iosTitle : styles.androidTitle;
 
+    const backIcon = renderBackIcon?.() ?? <BackIcon color={resolvedBackIconColor} />;
+
     return (
         <View
             style={[
@@ -84,26 +111,11 @@ export function SplitViewSidebarHeader({
                 {resolvedTitleAlign === 'center' ? (
                     // Centered title layout (standard iOS UINavigationBar)
                     <>
-                        <View
-                            style={[
-                                styles.centerSideSlot,
-                                canGoBack ? styles.centerSideSlotWithButton : styles.centerSideSlotEmpty,
-                            ]}
-                        >
+                        <View style={[styles.centerSideSlot, canGoBack ? styles.centerSideSlotWithButton : styles.centerSideSlotEmpty]}>
                             {canGoBack && (
-                                <Pressable
-                                    accessibilityRole="button"
-                                    accessibilityLabel="Go back"
-                                    hitSlop={8}
-                                    onPress={onBack}
-                                    style={({ pressed }) => [
-                                        isIOS ? styles.iosBackButton : styles.androidBackButton,
-                                        pressed && (isIOS ? styles.iosButtonPressed : styles.androidButtonPressed),
-                                    ]}
-                                    android_ripple={!isIOS ? ANDROID_RIPPLE : undefined}
-                                >
-                                    {renderBackIcon?.() ?? <BackIcon color={resolvedBackIconColor} />}
-                                </Pressable>
+                                <BackButton isIOS={isIOS} hitSlop={8} onPress={onBack}>
+                                    {backIcon}
+                                </BackButton>
                             )}
                         </View>
 
@@ -125,10 +137,7 @@ export function SplitViewSidebarHeader({
 
                         {/* Balance the left slot so title stays centered */}
                         <View
-                            style={[
-                                styles.centerSideSlot,
-                                canGoBack ? styles.centerSideSlotWithButton : styles.centerSideSlotEmpty,
-                            ]}
+                            style={[styles.centerSideSlot, canGoBack ? styles.centerSideSlotWithButton : styles.centerSideSlotEmpty]}
                             pointerEvents="none"
                         />
                     </>
@@ -143,19 +152,9 @@ export function SplitViewSidebarHeader({
                         ]}
                     >
                         {canGoBack && (
-                            <Pressable
-                                accessibilityRole="button"
-                                accessibilityLabel="Go back"
-                                hitSlop={isIOS ? 8 : 4}
-                                onPress={onBack}
-                                style={({ pressed }) => [
-                                    isIOS ? styles.iosBackButton : styles.androidBackButton,
-                                    pressed && (isIOS ? styles.iosButtonPressed : styles.androidButtonPressed),
-                                ]}
-                                android_ripple={!isIOS ? ANDROID_RIPPLE : undefined}
-                            >
-                                {renderBackIcon?.() ?? <BackIcon color={resolvedBackIconColor} />}
-                            </Pressable>
+                            <BackButton isIOS={isIOS} hitSlop={isIOS ? 8 : 4} onPress={onBack}>
+                                {backIcon}
+                            </BackButton>
                         )}
                         {title ? (
                             <Text

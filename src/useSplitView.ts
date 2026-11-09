@@ -3,8 +3,9 @@ import { useCallback, useContext } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
 import type { UseSplitViewResult } from './types';
+import { DEFAULT_TABLET_BREAKPOINT } from './constants';
 
-export function useSplitView(breakpoint = 768): UseSplitViewResult {
+export function useSplitView(breakpoint = DEFAULT_TABLET_BREAKPOINT): UseSplitViewResult {
     const router = useRouter();
     const navigation = useNavigation();
     const location = useContext(SplitViewLocationContext);

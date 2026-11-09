@@ -1,4 +1,4 @@
-import { Stack, useNavigation, usePathname, useTheme } from 'expo-router';
+import { Stack, useNavigation, usePathname, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View, useWindowDimensions, type ColorValue } from 'react-native';
 import type { SplitViewProps } from './types';
@@ -6,17 +6,22 @@ import { SplitViewLocationContext } from './SplitViewLocationContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
+import { DEFAULT_TABLET_BREAKPOINT } from './constants';
+
+// Stable default references so they are not re-created on every render.
+const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = { headerShown: true };
+const DEFAULT_SAFE_AREA_EDGES: NonNullable<SplitViewProps['safeAreaEdges']> = ['left', 'right', 'bottom'];
 
 export function SplitView({
     masterList,
     children,
     masterListWidth = 320,
-    tabletBreakpoint = 768,
+    tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
     containerStyle,
     masterStyle,
     detailStyle,
-    stackScreenOptions = { headerShown: true },
-    safeAreaEdges = ['left', 'right', 'bottom'],
+    stackScreenOptions = DEFAULT_STACK_SCREEN_OPTIONS,
+    safeAreaEdges = DEFAULT_SAFE_AREA_EDGES,
     leftHeader = false,
     leftHeaderTitle,
     renderBackIcon,
