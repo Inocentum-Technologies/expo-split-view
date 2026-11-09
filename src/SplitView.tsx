@@ -1,9 +1,9 @@
-import { Stack, useNavigation, usePathname, useTheme, type NativeStackNavigationOptions } from 'expo-router';
+import { Stack, useNavigation, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View, useWindowDimensions, type ColorValue } from 'react-native';
 import type { SplitViewProps } from './types';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
 import { DEFAULT_TABLET_BREAKPOINT } from './constants';
@@ -42,18 +42,20 @@ export function SplitView({
 
     // Outer stack: confirmed by your log (routes: ["index", "home"]).
     const navigation = useNavigation();
-    const pathname = usePathname();
-    const [canGoBack, setCanGoBack] = useState(false);
 
-    useEffect(() => {
-        const update = () => {
-            const s = navigation.getState();
-            setCanGoBack(!!s && s.type === 'stack' && s.index > 0);
-        };
-
-        update(); // after mount, so the state is complete
-        return navigation.addListener('state', update);
-    }, [navigation, pathname]);
+    // canGoBack is derived from the outer stack state. Subscribing through
+    // useSyncExternalStore re-renders only when the boolean actually flips
+    // (instead of on every pathname change), and it re-checks the snapshot right
+    // after mount, so a not-yet-complete state during the first render is corrected.
+    const subscribeToNavState = useCallback(
+        (notify: () => void) => navigation.addListener('state', notify),
+        [navigation]
+    );
+    const getCanGoBack = useCallback(() => {
+        const s = navigation.getState();
+        return !!s && s.type === 'stack' && s.index > 0;
+    }, [navigation]);
+    const canGoBack = useSyncExternalStore(subscribeToNavState, getCanGoBack, getCanGoBack);
 
     const goBack = useCallback(() => navigation.goBack(), [navigation]);
 
