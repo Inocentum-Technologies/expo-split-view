@@ -16,8 +16,8 @@ export * from './src/BackIcon';
  * Compound component for SplitView layout.
  *
  * Usage:
- * - `<SplitView master={<MasterList />} />` in your `_layout.tsx`
- * - `<SplitView.Placeholder master={<MasterList />} />` in your `index.tsx`
+ * - `<SplitView masterList={<MasterList />} />` in your `_layout.tsx`
+ * - `<SplitView.Placeholder masterList={<MasterList />} />` in your `index.tsx`
  * - `<SplitView.Detail>...</SplitView.Detail>` in your `[id]/index.tsx`
  */
 export const SplitView = Object.assign(BaseSplitView, {

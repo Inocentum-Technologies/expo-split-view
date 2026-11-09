@@ -1,4 +1,5 @@
-import { createContext, useContext } from 'react';
+import { createContext, useCallback, useContext, useSyncExternalStore } from 'react';
+import { Dimensions } from 'react-native';
 import { DEFAULT_TABLET_BREAKPOINT } from './constants';
 
 /**
@@ -12,4 +13,27 @@ export const SplitViewBreakpointContext = createContext<number>(DEFAULT_TABLET_B
 /** Returns the nearest SplitView's breakpoint (768 when rendered outside a SplitView). */
 export function useTabletBreakpoint(): number {
     return useContext(SplitViewBreakpointContext);
+}
+
+function subscribeToDimensions(notify: () => void) {
+    const subscription = Dimensions.addEventListener('change', notify);
+    return () => subscription.remove();
+}
+
+/**
+ * `window width >= breakpoint`, subscribed through a boolean snapshot so the caller
+ * re-renders only when the width crosses the breakpoint, not on every resize tick
+ * (unlike `useWindowDimensions`, which re-renders on every change).
+ */
+export function useIsWideWindow(breakpoint: number): boolean {
+    const getSnapshot = useCallback(
+        () => Dimensions.get('window').width >= breakpoint,
+        [breakpoint]
+    );
+    return useSyncExternalStore(subscribeToDimensions, getSnapshot, getSnapshot);
+}
+
+/** Tablet layout check for anything rendered inside a <SplitView>. */
+export function useIsTablet(): boolean {
+    return useIsWideWindow(useTabletBreakpoint());
 }

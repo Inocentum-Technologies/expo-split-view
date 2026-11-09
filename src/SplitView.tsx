@@ -1,12 +1,12 @@
 import { Stack, useNavigation, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, useWindowDimensions, type ColorValue } from 'react-native';
+import { StyleSheet, View, type ColorValue } from 'react-native';
 import type { SplitViewProps } from './types';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
-import { SplitViewBreakpointContext } from './SplitViewBreakpointContext';
+import { SplitViewBreakpointContext, useIsWideWindow } from './SplitViewBreakpointContext';
 import { DEFAULT_TABLET_BREAKPOINT } from './constants';
 
 // Stable default references so they are not re-created on every render.
@@ -42,9 +42,9 @@ export function SplitView({
     leftHeaderTitleStyle,
     leftHeaderStyle,
 }: SplitViewProps) {
-    const { width } = useWindowDimensions();
     const theme = useTheme();
-    const isTablet = width >= tabletBreakpoint;
+    // Re-renders only when the window width crosses the breakpoint, not on every resize tick.
+    const isTablet = useIsWideWindow(tabletBreakpoint);
 
     // By default the left pane stays mounted (hidden) on phones to preserve its state.
     // With `unmountMasterOnPhone` it is removed entirely, so the master list is only
@@ -79,7 +79,8 @@ export function SplitView({
     const leftHeaderValue = useMemo(() => ({ canGoBack, goBack }), [canGoBack, goBack]);
 
     const resolvedStackScreenOptions = useMemo(() => {
-        if (!stackScreenOptions) return DEFAULT_STACK_SCREEN_OPTIONS;
+        // Nothing custom passed: reuse the constant instead of building a merged copy.
+        if (stackScreenOptions === DEFAULT_STACK_SCREEN_OPTIONS) return DEFAULT_STACK_SCREEN_OPTIONS;
         return {
             ...DEFAULT_STACK_SCREEN_OPTIONS,
             ...stackScreenOptions,
