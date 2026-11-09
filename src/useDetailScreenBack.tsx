@@ -7,10 +7,10 @@ import {
 } from 'expo-router';
 import {
     useCallback,
-    useEffect,
     useLayoutEffect,
     useMemo,
-    useState,
+    useRef,
+    useSyncExternalStore,
 } from 'react';
 import {
     BackHandler,
@@ -56,6 +56,15 @@ export function useDetailScreenBack(
     const { width } = useWindowDimensions();
     const isTablet = width >= tabletBreakpoint;
 
+    // `onFallback` is only invoked from event handlers, never during render, so the latest
+    // value can live in a ref. This keeps `handleBack` stable even when the consumer passes
+    // an inline function (which would otherwise rebuild the PanResponder, re-run the
+    // header `setOptions` effect and re-subscribe BackHandler on every render).
+    const onFallbackRef = useRef(onFallback);
+    useLayoutEffect(() => {
+        onFallbackRef.current = onFallback;
+    });
+
     // Dynamically infer the parent route (e.g. dropping the active child segment) if not explicitly passed
     const defaultFallback = useMemo(() => {
         if (segments.length > 1) {
@@ -100,22 +109,33 @@ export function useDetailScreenBack(
         return state.routes.some((route) => isIndexRoute(route.name));
     }, [navigation, isIndexRoute]);
 
-    // Force re-render whenever navigation state updates or screen gains focus
-    const [, forceUpdate] = useState({});
+    const checkCanGoBack = useCallback(() => navigation.canGoBack(), [navigation]);
 
-    useEffect(() => {
-        return navigation.addListener('state', () => {
-            forceUpdate({});
-        });
-    }, [navigation]);
-
-    useFocusEffect(
-        useCallback(() => {
-            forceUpdate({});
-        }, [])
+    // Re-render only when one of the derived booleans actually changes, instead of on every
+    // navigation `state` event and every focus. Snapshots are re-read on each render too,
+    // so width / option changes still pick up the latest values.
+    const subscribeToNavigation = useCallback(
+        (notify: () => void) => {
+            const offState = navigation.addListener('state', notify);
+            const offFocus = navigation.addListener('focus', notify);
+            return () => {
+                offState();
+                offFocus();
+            };
+        },
+        [navigation]
     );
 
-    const hasIndexInHistory = checkHasIndexInHistory();
+    const hasIndexInHistory = useSyncExternalStore(
+        subscribeToNavigation,
+        checkHasIndexInHistory,
+        checkHasIndexInHistory
+    );
+    const canGoBack = useSyncExternalStore(
+        subscribeToNavigation,
+        checkCanGoBack,
+        checkCanGoBack
+    );
 
     // Active condition: Intervene only on Mobile screens when the master list is NOT in history
     const showCustomMobileBack = !isTablet && !hasIndexInHistory;
@@ -123,17 +143,17 @@ export function useDetailScreenBack(
     // On tablet, router.replace() is used to swap detail screens, so the placeholder is no longer
     // in history. When the user presses back at the root of a detail screen, the native stack has
     // nothing to pop and would exit the app. Intercept to return to the placeholder/fallback.
-    const isTabletAtRoot = isTablet && !navigation.canGoBack();
+    const isTabletAtRoot = isTablet && !canGoBack;
 
     const handleBack = useCallback(() => {
         if (navigation.canGoBack() || (!isTablet && checkHasIndexInHistory())) {
             router.back();
-        } else if (onFallback) {
-            onFallback();
+        } else if (onFallbackRef.current) {
+            onFallbackRef.current();
         } else {
             router.replace(targetFallback);
         }
-    }, [navigation, isTablet, checkHasIndexInHistory, router, onFallback, targetFallback]);
+    }, [navigation, isTablet, checkHasIndexInHistory, router, targetFallback]);
 
     // 1. Header Back Button
     useLayoutEffect(() => {
