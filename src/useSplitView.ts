@@ -3,13 +3,15 @@ import { useCallback, useContext } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
 import type { UseSplitViewResult } from './types';
-import { DEFAULT_TABLET_BREAKPOINT } from './constants';
+import { useTabletBreakpoint } from './SplitViewBreakpointContext';
 
-export function useSplitView(breakpoint = DEFAULT_TABLET_BREAKPOINT): UseSplitViewResult {
+export function useSplitView(): UseSplitViewResult {
     const router = useRouter();
     const navigation = useNavigation();
     const location = useContext(SplitViewLocationContext);
     const { width } = useWindowDimensions();
+    // The breakpoint is configured once, on the parent <SplitView>.
+    const breakpoint = useTabletBreakpoint();
     const isTablet = width >= breakpoint;
 
     const navigate = useCallback(
