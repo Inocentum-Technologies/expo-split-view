@@ -69,7 +69,9 @@ export interface SplitViewProps {
      */
     detailStyle?: StyleProp<ViewStyle>;
     /**
-     * Default screen options for the auto-rendered `<Stack />` when `children` is not provided.
+     * Screen options for the auto-rendered `<Stack />` when `children` is not provided.
+     * They are merged over the built-in defaults (`headerShown: true` and the
+     * `unstable_nativeProps.headerConfig` inset flags); your values take precedence.
      */
     stackScreenOptions?: NativeStackNavigationOptions;
     /**

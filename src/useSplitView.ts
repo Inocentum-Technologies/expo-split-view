@@ -1,9 +1,9 @@
 import { type Href, useNavigation, useRouter } from 'expo-router';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
-import type { UseSplitViewResult } from './types';
 import { useTabletBreakpoint } from './SplitViewBreakpointContext';
+import type { UseSplitViewResult } from './types';
 
 export function useSplitView(): UseSplitViewResult {
     const router = useRouter();
@@ -48,5 +48,6 @@ export function useSplitView(): UseSplitViewResult {
         [isTablet, router, navigation, location]
     );
 
-    return { isTablet, width, navigate };
+    // Stable reference between renders so consumers can safely use the result in dependency arrays.
+    return useMemo(() => ({ isTablet, width, navigate }), [isTablet, width, navigate]);
 }

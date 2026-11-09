@@ -19,11 +19,10 @@ import {
     Pressable,
     StyleSheet,
     Text,
-    useWindowDimensions,
 } from 'react-native';
 import type { UseDetailScreenBackOptions, UseDetailBackResult } from './types';
 import { BackIcon } from './BackIcon';
-import { useTabletBreakpoint } from './SplitViewBreakpointContext';
+import { useIsTablet } from './SplitViewBreakpointContext';
 
 /**
  * Custom hook to handle back navigation and gestures in master-detail split layouts.
@@ -52,10 +51,9 @@ export function useDetailScreenBack(
     const router = useRouter();
     const navigation = useNavigation();
     const segments = useSegments();
-    const { width } = useWindowDimensions();
     // The breakpoint is configured once, on the parent <SplitView>.
-    const tabletBreakpoint = useTabletBreakpoint();
-    const isTablet = width >= tabletBreakpoint;
+    // Re-renders only when the window width crosses it, not on every resize tick.
+    const isTablet = useIsTablet();
 
     // `onFallback` is only invoked from event handlers, never during render, so the latest
     // value can live in a ref. This keeps `handleBack` stable even when the consumer passes
@@ -247,14 +245,20 @@ export function useDetailScreenBack(
         [showCustomMobileBack, disableEdgeSwipeGesture, handleBack]
     );
 
-    return {
-        showCustomMobileBack,
-        handleBack,
-        panHandlers: panResponder.panHandlers,
-        isTablet,
-        hasIndexInHistory,
-        isTabletAtRoot,
-    };
+    const { panHandlers } = panResponder;
+
+    // Stable reference between renders so consumers can safely use the result in dependency arrays.
+    return useMemo(
+        () => ({
+            showCustomMobileBack,
+            handleBack,
+            panHandlers,
+            isTablet,
+            hasIndexInHistory,
+            isTabletAtRoot,
+        }),
+        [showCustomMobileBack, handleBack, panHandlers, isTablet, hasIndexInHistory, isTabletAtRoot]
+    );
 }
 
 const styles = StyleSheet.create({

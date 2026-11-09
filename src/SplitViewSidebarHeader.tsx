@@ -101,7 +101,10 @@ export function SplitViewSidebarHeader({
 
     const titlePlatformStyle = isIOS ? styles.iosTitle : styles.androidTitle;
 
-    const backIcon = renderBackIcon?.() ?? <BackIcon color={resolvedBackIconColor} />;
+    // Only call the consumer's renderBackIcon when the button is actually shown.
+    const backIcon = canGoBack
+        ? (renderBackIcon?.() ?? <BackIcon color={resolvedBackIconColor} />)
+        : null;
 
     return (
         <View
@@ -145,8 +148,11 @@ export function SplitViewSidebarHeader({
 
                         {/* Balance the left slot so title stays centered */}
                         <View
-                            style={[styles.centerSideSlot, canGoBack ? styles.centerSideSlotWithButton : styles.centerSideSlotEmpty]}
-                            pointerEvents="none"
+                            style={[
+                                styles.centerSideSlot,
+                                canGoBack ? styles.centerSideSlotWithButton : styles.centerSideSlotEmpty,
+                                styles.noPointerEvents,
+                            ]}
                         />
                     </>
                 ) : (
@@ -227,6 +233,9 @@ const styles = StyleSheet.create({
     },
     centerSideSlotEmpty: {
         width: 16,
+    },
+    noPointerEvents: {
+        pointerEvents: 'none',
     },
     centerTitleWrapper: {
         flex: 1,
