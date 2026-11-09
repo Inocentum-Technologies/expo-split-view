@@ -50,6 +50,10 @@ export interface SplitViewProps {
     unmountMasterOnPhone?: boolean;
     /**
      * Minimum screen width (in points) for tablet layout. Defaults to 768.
+     *
+     * This is the only place the breakpoint is configured: `SplitView.Placeholder`,
+     * `useSplitView` and `useDetailScreenBack` rendered inside this `SplitView` read it
+     * automatically. (Outside a `SplitView` they fall back to 768.)
      */
     tabletBreakpoint?: number;
     /**
@@ -135,10 +139,6 @@ export interface SplitViewPlaceholderProps {
      */
     placeholderText?: string;
     /**
-     * Minimum screen width (in points) for tablet layout. Defaults to 768.
-     */
-    tabletBreakpoint?: number;
-    /**
      * Style override for the tablet placeholder container.
      */
     placeholderContainerStyle?: StyleProp<ViewStyle>;
@@ -158,10 +158,6 @@ export interface UseDetailScreenBackOptions {
      * Optional screen title to set on the header.
      */
     title?: string;
-    /**
-     * Screen width breakpoint in points for tablet mode. Defaults to 768.
-     */
-    tabletBreakpoint?: number;
     /**
      * Text label next to back chevron on iOS (defaults to "Back"). Pass empty string `""` or `null` to hide.
      */

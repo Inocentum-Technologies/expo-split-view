@@ -6,19 +6,11 @@ import { SplitViewLocationContext } from './SplitViewLocationContext';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
+import { SplitViewBreakpointContext } from './SplitViewBreakpointContext';
 import { DEFAULT_TABLET_BREAKPOINT } from './constants';
 
 // Stable default references so they are not re-created on every render.
-const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = {
-    headerShown: true,
-    unstable_nativeProps: {
-        headerConfig: {
-            disableLeftInsetApplication: true,
-            disableRightInsetApplication: true,
-            disableBottomInsetApplication: true,
-        },
-    },
-};
+const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = { headerShown: true };
 const DEFAULT_SAFE_AREA_EDGES: NonNullable<SplitViewProps['safeAreaEdges']> = ['left', 'right', 'bottom'];
 
 export function SplitView({
@@ -77,22 +69,6 @@ export function SplitView({
     // after canGoBack and goBack are defined
     const leftHeaderValue = useMemo(() => ({ canGoBack, goBack }), [canGoBack, goBack]);
 
-    const resolvedStackScreenOptions = useMemo(() => {
-        if (!stackScreenOptions) return DEFAULT_STACK_SCREEN_OPTIONS;
-        return {
-            ...DEFAULT_STACK_SCREEN_OPTIONS,
-            ...stackScreenOptions,
-            unstable_nativeProps: {
-                ...DEFAULT_STACK_SCREEN_OPTIONS.unstable_nativeProps,
-                ...stackScreenOptions.unstable_nativeProps,
-                headerConfig: {
-                    ...DEFAULT_STACK_SCREEN_OPTIONS.unstable_nativeProps?.headerConfig,
-                    ...stackScreenOptions.unstable_nativeProps?.headerConfig,
-                },
-            },
-        };
-    }, [stackScreenOptions]);
-
     return (
         // SafeAreaView applies the correct platform insets for the requested edges
         // automatically — no manual useSafeAreaInsets math required.
@@ -103,61 +79,68 @@ export function SplitView({
             style={[styles.container, { backgroundColor: gutterBg }, containerStyle]}
         >
             {/*
-                The Master pane stays mounted at all times to preserve component states
-                (unless `unmountMasterOnPhone` is set).
-                On tablet, it sits on the left with fixed width.
-                On phone, it is hidden with display: 'none' and width: 0.
-                SafeAreaView's left-edge inset pushes the entire row, so the left
-                pane naturally starts after the camera cutout — no width math needed.
+                The breakpoint context wraps BOTH panes so SplitView.Placeholder, useSplitView
+                and useDetailScreenBack (rendered inside the stack) inherit `tabletBreakpoint`
+                without it being passed again.
             */}
-            {showLeftPane && (
+            <SplitViewBreakpointContext.Provider value={tabletBreakpoint}>
+                {/*
+                    The Master pane stays mounted at all times to preserve component states
+                    (unless `unmountMasterOnPhone` is set).
+                    On tablet, it sits on the left with fixed width.
+                    On phone, it is hidden with display: 'none' and width: 0.
+                    SafeAreaView's left-edge inset pushes the entire row, so the left
+                    pane naturally starts after the camera cutout — no width math needed.
+                */}
+                {showLeftPane && (
+                    <View
+                        style={[
+                            styles.leftPane,
+                            {
+                                borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
+                                backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
+                                width: masterListWidth,
+                            },
+                            !isTablet && styles.hiddenPane,
+                            masterStyle,
+                        ]}
+                    >
+                        <SplitViewLocationContext.Provider value="sidebar">
+                            <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
+                                {leftHeader === true && (
+                                    <SplitViewSidebarHeader
+                                        title={leftHeaderTitle}
+                                        renderBackIcon={renderBackIcon}
+                                        backIconColor={leftHeaderBackIconColor}
+                                        height={leftHeaderHeight}
+                                        canGoBack={canGoBack}
+                                        onBack={goBack}
+                                        titleAlign={leftHeaderTitleAlign}
+                                        titleStyle={leftHeaderTitleStyle}
+                                        headerStyle={leftHeaderStyle}
+                                    />
+                                )}
+                                {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
+                                {masterList}
+                            </SplitViewLeftHeaderContext.Provider>
+                        </SplitViewLocationContext.Provider>
+                    </View>
+                )}
+
+                {/*
+                    The Detail pane holds the active screens.
+                    When rotating, the stack stays mounted so user inputs and scroll states persist.
+                */}
                 <View
                     style={[
-                        styles.leftPane,
-                        {
-                            borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
-                            backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
-                            width: masterListWidth,
-                        },
-                        !isTablet && styles.hiddenPane,
-                        masterStyle,
+                        styles.rightPane,
+                        { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
+                        detailStyle,
                     ]}
                 >
-                    <SplitViewLocationContext.Provider value="sidebar">
-                        <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
-                            {leftHeader === true && (
-                                <SplitViewSidebarHeader
-                                    title={leftHeaderTitle}
-                                    renderBackIcon={renderBackIcon}
-                                    backIconColor={leftHeaderBackIconColor}
-                                    height={leftHeaderHeight}
-                                    canGoBack={canGoBack}
-                                    onBack={goBack}
-                                    titleAlign={leftHeaderTitleAlign}
-                                    titleStyle={leftHeaderTitleStyle}
-                                    headerStyle={leftHeaderStyle}
-                                />
-                            )}
-                            {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
-                            {masterList}
-                        </SplitViewLeftHeaderContext.Provider>
-                    </SplitViewLocationContext.Provider>
+                    {children ?? <Stack screenOptions={stackScreenOptions} />}
                 </View>
-            )}
-
-            {/*
-                The Detail pane holds the active screens.
-                When rotating, the stack stays mounted so user inputs and scroll states persist.
-            */}
-            <View
-                style={[
-                    styles.rightPane,
-                    { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
-                    detailStyle,
-                ]}
-            >
-                {children ?? <Stack screenOptions={resolvedStackScreenOptions} />}
-            </View>
+            </SplitViewBreakpointContext.Provider>
         </SafeAreaView>
     );
 }

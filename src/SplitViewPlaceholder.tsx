@@ -1,7 +1,7 @@
 import { Stack, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { StyleSheet, Text, View, useWindowDimensions, type ColorValue } from 'react-native';
 import type { SplitViewPlaceholderProps } from './types';
-import { DEFAULT_TABLET_BREAKPOINT } from './constants';
+import { useTabletBreakpoint } from './SplitViewBreakpointContext';
 
 // Stable references so <Stack.Screen> only re-applies options when the mode changes.
 const renderNoHeaderLeft = () => null;
@@ -15,13 +15,14 @@ export function SplitViewPlaceholder({
     masterList,
     placeholderText = 'Select an item from the left pane',
     placeholder,
-    tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
     placeholderContainerStyle,
     placeholderTextStyle,
 }: SplitViewPlaceholderProps) {
     const { width } = useWindowDimensions();
     const theme = useTheme();
-    const isTablet = width >= tabletBreakpoint;
+    // The breakpoint is configured once, on the parent <SplitView>.
+    const breakpoint = useTabletBreakpoint();
+    const isTablet = width >= breakpoint;
 
     // If phone, render the Master List inside the full-screen stack
     if (!isTablet) {

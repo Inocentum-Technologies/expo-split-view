@@ -23,7 +23,7 @@ import {
 } from 'react-native';
 import type { UseDetailScreenBackOptions, UseDetailBackResult } from './types';
 import { BackIcon } from './BackIcon';
-import { DEFAULT_TABLET_BREAKPOINT } from './constants';
+import { useTabletBreakpoint } from './SplitViewBreakpointContext';
 
 /**
  * Custom hook to handle back navigation and gestures in master-detail split layouts.
@@ -39,7 +39,6 @@ export function useDetailScreenBack(
     const {
         fallbackRoute,
         title,
-        tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
         backTitle = 'Back',
         showHeaderButton = true,
         renderBackIcon,
@@ -54,6 +53,8 @@ export function useDetailScreenBack(
     const navigation = useNavigation();
     const segments = useSegments();
     const { width } = useWindowDimensions();
+    // The breakpoint is configured once, on the parent <SplitView>.
+    const tabletBreakpoint = useTabletBreakpoint();
     const isTablet = width >= tabletBreakpoint;
 
     // `onFallback` is only invoked from event handlers, never during render, so the latest
