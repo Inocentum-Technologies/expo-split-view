@@ -9,7 +9,16 @@ import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
 import { DEFAULT_TABLET_BREAKPOINT } from './constants';
 
 // Stable default references so they are not re-created on every render.
-const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = { headerShown: true };
+const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = {
+    headerShown: true,
+    unstable_nativeProps: {
+        headerConfig: {
+            disableLeftInsetApplication: true,
+            disableRightInsetApplication: true,
+            disableBottomInsetApplication: true,
+        },
+    },
+};
 const DEFAULT_SAFE_AREA_EDGES: NonNullable<SplitViewProps['safeAreaEdges']> = ['left', 'right', 'bottom'];
 
 export function SplitView({
@@ -67,6 +76,22 @@ export function SplitView({
 
     // after canGoBack and goBack are defined
     const leftHeaderValue = useMemo(() => ({ canGoBack, goBack }), [canGoBack, goBack]);
+
+    const resolvedStackScreenOptions = useMemo(() => {
+        if (!stackScreenOptions) return DEFAULT_STACK_SCREEN_OPTIONS;
+        return {
+            ...DEFAULT_STACK_SCREEN_OPTIONS,
+            ...stackScreenOptions,
+            unstable_nativeProps: {
+                ...DEFAULT_STACK_SCREEN_OPTIONS.unstable_nativeProps,
+                ...stackScreenOptions.unstable_nativeProps,
+                headerConfig: {
+                    ...DEFAULT_STACK_SCREEN_OPTIONS.unstable_nativeProps?.headerConfig,
+                    ...stackScreenOptions.unstable_nativeProps?.headerConfig,
+                },
+            },
+        };
+    }, [stackScreenOptions]);
 
     return (
         // SafeAreaView applies the correct platform insets for the requested edges
@@ -131,7 +156,7 @@ export function SplitView({
                     detailStyle,
                 ]}
             >
-                {children ?? <Stack screenOptions={stackScreenOptions} />}
+                {children ?? <Stack screenOptions={resolvedStackScreenOptions} />}
             </View>
         </SafeAreaView>
     );
