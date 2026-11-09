@@ -2,11 +2,13 @@ import {
     Image,
     I18nManager,
     Platform,
+    StyleSheet,
     useColorScheme,
     type ColorValue,
     type ImageStyle,
     type StyleProp,
 } from 'react-native';
+import { memo, useMemo } from 'react';
 
 const ICON = Platform.select({
     ios: require('./assets/back-ios.png'),
@@ -24,9 +26,14 @@ export type BackIconProps = {
     style?: StyleProp<ImageStyle>;
 };
 
-export function BackIcon({ color, size = DEFAULT_SIZE, style }: BackIconProps) {
+function BackIconComponent({ color, size = DEFAULT_SIZE, style }: BackIconProps) {
     const scheme = useColorScheme();
     const tint = color ?? (scheme === 'dark' ? '#FFFFFF' : '#000000');
+
+    const baseStyle = useMemo<ImageStyle>(
+        () => ({ width: size, height: size, tintColor: tint }),
+        [size, tint]
+    );
 
     return (
         <Image
@@ -34,16 +41,16 @@ export function BackIcon({ color, size = DEFAULT_SIZE, style }: BackIconProps) {
             resizeMode="contain"
             accessibilityElementsHidden
             importantForAccessibility="no"
-            style={[
-                {
-                    width: size,
-                    height: size,
-                    tintColor: tint,
-                    // React Native doesn't mirror image assets in RTL, so flip manually.
-                    transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
-                },
-                style,
-            ]}
+            // React Native doesn't mirror image assets in RTL, so flip manually.
+            style={[baseStyle, I18nManager.isRTL && styles.rtlFlip, style]}
         />
     );
 }
+
+export const BackIcon = memo(BackIconComponent);
+
+const styles = StyleSheet.create({
+    rtlFlip: {
+        transform: [{ scaleX: -1 }],
+    },
+});

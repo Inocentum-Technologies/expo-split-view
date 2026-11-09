@@ -1,12 +1,21 @@
-import { Stack, useTheme } from 'expo-router';
+import { Stack, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { StyleSheet, Text, View, useWindowDimensions, type ColorValue } from 'react-native';
 import type { SplitViewPlaceholderProps } from './types';
+import { DEFAULT_TABLET_BREAKPOINT } from './constants';
+
+// Stable references so <Stack.Screen> only re-applies options when the mode changes.
+const renderNoHeaderLeft = () => null;
+const PHONE_OPTIONS: NativeStackNavigationOptions = { headerBackVisible: true };
+const TABLET_OPTIONS: NativeStackNavigationOptions = {
+    headerBackVisible: false,
+    headerLeft: renderNoHeaderLeft,
+};
 
 export function SplitViewPlaceholder({
     masterList,
     placeholderText = 'Select an item from the left pane',
     placeholder,
-    tabletBreakpoint = 768,
+    tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
     placeholderContainerStyle,
     placeholderTextStyle,
 }: SplitViewPlaceholderProps) {
@@ -18,7 +27,7 @@ export function SplitViewPlaceholder({
     if (!isTablet) {
         return (
             <>
-                <Stack.Screen options={{ headerBackVisible: true }} />
+                <Stack.Screen options={PHONE_OPTIONS} />
                 {masterList}
             </>
         );
@@ -27,7 +36,7 @@ export function SplitViewPlaceholder({
     // If tablet, render custom placeholder if passed, else default placeholder view
     return (
         <>
-            <Stack.Screen options={{ headerBackVisible: false, headerLeft: () => null }} />
+            <Stack.Screen options={TABLET_OPTIONS} />
             {placeholder ?? (
                 <View
                     style={[

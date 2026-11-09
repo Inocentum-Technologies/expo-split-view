@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import type { UseDetailScreenBackOptions, UseDetailBackResult } from './types';
 import { BackIcon } from './BackIcon';
+import { DEFAULT_TABLET_BREAKPOINT } from './constants';
 
 /**
  * Custom hook to handle back navigation and gestures in master-detail split layouts.
@@ -38,7 +39,7 @@ export function useDetailScreenBack(
     const {
         fallbackRoute,
         title,
-        tabletBreakpoint = 768,
+        tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
         backTitle = 'Back',
         showHeaderButton = true,
         renderBackIcon,
