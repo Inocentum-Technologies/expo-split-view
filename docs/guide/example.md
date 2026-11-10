@@ -57,7 +57,7 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 ### 3. State Preservation Across Form Factors
 - Search for frameworks, apply category filters, or select an item.
 - Resize the window or rotate the device between phone and tablet modes.
-- The selected framework, search query, filter states, and master list scroll position remain completely intact because `<SplitView>` never unmounts either pane.
+- The selected framework, search query, filter states, and master list scroll position remain completely intact because `<SplitView>` keeps both panes mounted by default (set `unmountMasterOnPhone` to opt out on phones; see [Mounting behavior on phones](/api/reference#mounting-behavior-on-phones)).
 
 ### 4. Resilient Mobile Back Navigation (`useDetailScreenBack`)
 - When transitioning from tablet to mobile where `router.replace` left the stack without a root `index`, the hook automatically provides:
@@ -73,4 +73,3 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 ### 6. Edge Inset & Theme Adaptation
 - Uses `safeAreaEdges={['left', 'right']}` to cleanly handle landscape cutouts without adding redundant top padding.
 - Seamlessly adapts between light and dark themes based on system preferences across the master list, search chips, cards, and detail pane.
-

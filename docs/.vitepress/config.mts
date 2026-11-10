@@ -22,6 +22,8 @@ export default defineConfig({
           { text: 'Quick Start', link: '/guide/quick-start' },
           { text: 'Customization', link: '/guide/customization' },
           { text: 'Example App', link: '/guide/example' },
+          { text: 'Migrate to v0.0.4+', link: '/guide/migration' },
+          { text: 'Changelog', link: '/guide/changelog' },
         ]
       },
       {
