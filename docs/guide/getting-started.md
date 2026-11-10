@@ -23,6 +23,12 @@ Install the package in your Expo project:
 npx expo install expo-split-view
 ```
 
+### Requirements
+
+- `expo` and `expo-router` **56 or newer**
+- `react` **18 or newer**
+- `react-native` and `react-native-safe-area-context` (already part of a standard Expo Router project)
+
 ### Expo Config Plugin (Optional)
 
 Add the config plugin to your `app.json` to automatically enable iPad / tablet multitasking support (`ios.supportsTablet: true`) in native builds:
@@ -63,6 +69,9 @@ Add the config plugin to your `app.json` to automatically enable iPad / tablet m
 ```
 
 ### Tablet Layout (`width >= tabletBreakpoint`, default 768)
+
+The breakpoint is the `tabletBreakpoint` prop of `<SplitView>`. It is configured only there: `<SplitView.Placeholder>`, `useSplitView()`, and `useDetailScreenBack()` all follow it automatically. Components re-render only when the window width crosses the breakpoint, not on every resize tick.
+
 On tablets or desktop viewports, `<SplitView>` divides the screen horizontally:
 - The **left pane** renders your master list with a fixed or customized width (default `320dp`).
 - The **right pane** renders an Expo Router `<Stack />` displaying detail screens or a placeholder when no item has been chosen.
@@ -75,3 +84,6 @@ On phones:
 - At the root `index.tsx`, `<SplitView.Placeholder>` renders the master list full-screen.
 - When an item is tapped, `navigate(href)` calls `router.push`, pushing the detail screen natively onto the mobile stack.
 
+::: tip Avoid the duplicate master list on phones
+Because the hidden left pane stays mounted, your master list is mounted twice on phones (hidden in the left pane, and full-screen by `<SplitView.Placeholder>`), so its effects and data fetching run twice. If that matters, pass `unmountMasterOnPhone` to `<SplitView>` to unmount the hidden copy. The trade-off is that the sidebar copy's state (scroll position, search text) is lost when the layout crosses the breakpoint. See [Mounting behavior on phones](/api/reference#mounting-behavior-on-phones).
+:::

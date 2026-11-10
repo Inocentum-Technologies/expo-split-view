@@ -104,6 +104,10 @@ useDetailScreenBack({
 });
 ```
 
+::: tip
+Define `renderBackIcon` outside your component (or wrap it in `useCallback`). A new function on every render makes the hook re-apply the header options each time.
+:::
+
 ## Left Sidebar Header & Outer Back Navigation
 
 When `<SplitView>` is placed inside a root stack or outer navigator (e.g. navigating from a Home or Dashboard screen into a SplitView screen), tablet users need a way to navigate back to the parent screen.
@@ -124,7 +128,7 @@ When `<SplitView>` is placed inside a root stack or outer navigator (e.g. naviga
 
 When `leftHeader` is `true`, `<SplitView>` automatically monitors the outer navigation stack:
 - **Outer Back Navigation**: If `canGoBack` is true, an adaptive platform back button (iOS chevron / Android arrow) is displayed. Pressing it safely pops the host screen in the outer navigator without disturbing right-pane detail screens or history.
-- **Platform-Adaptive Sizing**: The sidebar header height automatically conforms to native platform guidelines (50dp on iPad, 44dp on iPhone, and 64dp on Android/Web) while accounting for safe-area top insets. Override with `leftHeaderHeight` if needed.
+- **Platform-Adaptive Sizing**: The sidebar header height automatically conforms to native platform guidelines while accounting for safe-area top insets: 50dp on iPad, 44dp on iPhone in portrait (32dp in landscape), and 64dp on Android/Web tablet-sized windows (56dp on phone-sized windows). Override with `leftHeaderHeight` if needed. See [Default sidebar header height](/api/reference#default-sidebar-header-height) for the exact rules.
 - **Platform-Adaptive Alignment**: Titles default to center alignment on iOS and left alignment on Android and Web, conforming to platform conventions. Override with `leftHeaderTitleAlign`.
 
 ### Custom Sidebar Header
@@ -209,3 +213,39 @@ If you are using `headerShown: false` across all screens and managing headers yo
 
 Or pass an empty array `[]` if a parent layout container already handles all safe area insets.
 
+## Tablet Breakpoint (`tabletBreakpoint`)
+
+By default, widths of `768` points and above use the tablet split layout. Change the threshold with the `tabletBreakpoint` prop on `<SplitView>`, and only there:
+
+```tsx
+// app/items/_layout.tsx
+<SplitView masterList={<MasterList />} tabletBreakpoint={900} />
+```
+
+`<SplitView.Placeholder>`, `useSplitView()`, and `useDetailScreenBack()` (including `backOptions` on `<SplitView.Detail>`) read this value automatically, so every part of your split view switches layouts at the same width. They have no breakpoint option of their own. If you are upgrading, see the [migration guide](/guide/migration).
+
+## Stack Screen Options (`stackScreenOptions`)
+
+Pass `stackScreenOptions` to configure the `<Stack />` that `<SplitView>` renders in the right pane. Your options are merged over the built-in defaults, so you only need to pass what you want to change:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  stackScreenOptions={{
+    headerTintColor: '#4F46E5',
+    headerLargeTitle: false,
+  }}
+/>
+```
+
+The defaults (`headerShown: true` plus native header inset flags) are listed in [Stack screen option defaults](/api/reference#stack-screen-option-defaults). `stackScreenOptions` is ignored when you pass your own `children` to `<SplitView>`.
+
+## Avoiding the Duplicate Master List on Phones (`unmountMasterOnPhone`)
+
+On phones, the left pane is kept mounted but hidden, so the master list is mounted twice: once in the hidden left pane and once by `<SplitView.Placeholder>` inside the stack. If your master list does expensive work on mount (network requests, subscriptions), opt in to unmounting the hidden copy:
+
+```tsx
+<SplitView masterList={<MasterList />} unmountMasterOnPhone />
+```
+
+Below the breakpoint the left pane, including `leftHeader`, is not rendered. The trade-off: state held by the sidebar copy of the master list (scroll position, search text) is lost when the layout crosses the breakpoint, because the pane remounts fresh when it returns. Keep the default (`false`) if preserving that state across rotation matters more than the duplicate mount.
