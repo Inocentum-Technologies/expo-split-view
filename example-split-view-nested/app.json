@@ -11,7 +11,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-split-view"
+      "expo-split-view",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,
