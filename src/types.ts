@@ -15,6 +15,18 @@ export interface SplitViewLeftHeaderValueProps {
     goBack: () => void;
 }
 
+/** State passed to a function-style `resizeHandle` so a custom handle can react to dragging. */
+export interface SplitViewResizeHandleState {
+    /** Current master pane width in dp. */
+    width: number;
+    /** Configured lower bound in dp. */
+    minWidth: number;
+    /** Configured upper bound in dp (the pane is additionally capped to 60% of the window). */
+    maxWidth: number;
+    /** True while the user is dragging the handle. */
+    isResizing: boolean;
+}
+
 export interface SplitViewProps {
     /**
      * The master list component or element to render.
@@ -29,9 +41,79 @@ export interface SplitViewProps {
      */
     children?: ReactNode;
     /**
-     * Width of the master pane on tablet in dp. Defaults to 320.
+     * Width of the master pane on tablet in dp. Defaults to `masterListDefaultWidth` (320).
+     *
+     * With `resizable`, this is the *starting* width and acts as the place to feed back a
+     * persisted value: when the prop value changes (for example after an async storage read)
+     * the pane adopts it. Dragging does not require you to update this prop.
      */
     masterListWidth?: number;
+    /**
+     * Width in dp the pane returns to on `reset()` and on a double tap of the resize handle.
+     * Defaults to 320. Useful when `masterListWidth` carries a persisted, user-chosen value.
+     */
+    masterListDefaultWidth?: number;
+    /**
+     * When `true`, the user can drag a handle on the boundary between the panes to change
+     * the master pane width (tablet layouts only). Defaults to `false`.
+     */
+    resizable?: boolean;
+    /**
+     * Smallest width in dp the user can drag the master pane to. Defaults to 240.
+     * Only used with `resizable`.
+     */
+    masterListMinWidth?: number;
+    /**
+     * Largest width in dp the user can drag the master pane to. Defaults to 480.
+     * The pane is additionally capped to 60% of the window width so the detail pane stays usable.
+     * Only used with `resizable`.
+     */
+    masterListMaxWidth?: number;
+    /**
+     * Custom visual for the resize handle. Replaces the built-in line + grip; gestures,
+     * hit area and accessibility are still handled by `SplitView`.
+     *
+     * Pass any element (an `<Image>`, an SVG, a `<View>`, ...) or a function that receives the
+     * live state, e.g. to highlight the handle while dragging:
+     *
+     * ```tsx
+     * resizeHandle={({ isResizing }) => <MyGrip active={isResizing} />}
+     * ```
+     *
+     * The content is purely visual (it never receives touches) and is centered on the
+     * pane boundary within `resizeHandleHitWidth`.
+     */
+    resizeHandle?: ReactNode | ((state: SplitViewResizeHandleState) => ReactNode);
+    /**
+     * Width in dp of the touch target of the handle, centered on the pane boundary
+     * (it overlaps both panes by half its width each). Defaults to 24.
+     */
+    resizeHandleHitWidth?: number;
+    /**
+     * Style override for the handle's touch target (for example `{ backgroundColor: '#0001' }`
+     * to see it while designing).
+     */
+    resizeHandleStyle?: StyleProp<ViewStyle>;
+    /**
+     * Whether a double tap on the handle restores `masterListDefaultWidth`. Defaults to `true`.
+     */
+    resetWidthOnDoubleTap?: boolean;
+    /**
+     * Called once when the user starts dragging the handle, with the width at the start.
+     */
+    onMasterListResizeStart?: (width: number) => void;
+    /**
+     * Called whenever the pane width changes (continuously while dragging, and for
+     * `setWidth` / `reset`), with the new width in whole dp. Fires only when the value changes.
+     * Do not persist from here unless you debounce: use `onMasterListResizeEnd` instead.
+     */
+    onMasterListResize?: (width: number) => void;
+    /**
+     * Called when a resize is complete: when the user lifts their finger, and after a
+     * programmatic `setWidth` / `reset` that changed the width. This is the callback to use
+     * for persisting the width.
+     */
+    onMasterListResizeEnd?: (width: number) => void;
     /**
      * When `true`, the left pane (master list and left header) is unmounted on phone
      * screens instead of being kept mounted but hidden.
@@ -252,4 +334,25 @@ export interface UseSplitViewResult {
      * - On phone: calls `router.push(href)` to push onto the stack natively.
      */
     navigate: (href: Href) => void;
+}
+
+export interface UseSplitViewResizeResult {
+    /** Whether the enclosing `<SplitView>` has `resizable` enabled. */
+    resizable: boolean;
+    /** Current master pane width in dp. Updates live while dragging. */
+    width: number;
+    /** Configured lower bound in dp. */
+    minWidth: number;
+    /** Configured upper bound in dp. */
+    maxWidth: number;
+    /** True while the user is dragging the handle. */
+    isResizing: boolean;
+    /**
+     * Sets the master pane width programmatically. The value is clamped to the allowed range
+     * and fires `onMasterListResize` and `onMasterListResizeEnd` if it changed.
+     * No-op when `resizable` is false.
+     */
+    setWidth: (width: number) => void;
+    /** Restores `masterListDefaultWidth`. Same callbacks as `setWidth`. */
+    reset: () => void;
 }

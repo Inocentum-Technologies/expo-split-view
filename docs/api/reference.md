@@ -17,6 +17,7 @@
 | `useSplitView()` | Hook | Provides `{ isTablet, width, navigate(href) }`. |
 | `useDetailScreenBack(options)` | Hook | Configures header back button, Android back handler, and edge-swipe gesture. |
 | `useCustomLeftHeader()` | Hook | Hook for master list components in the left pane to access `{ canGoBack, goBack }`. |
+| `useSplitViewResize()` | Hook | Reads and controls the master pane width: `{ resizable, width, minWidth, maxWidth, isResizing, setWidth, reset }`. |
 
 
 ## `<SplitView />`
@@ -32,7 +33,18 @@ import { SplitView } from 'expo-split-view';
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `masterList` | `ReactNode` | *required* | The master list element to render in the left pane. |
-| `masterListWidth` | `number` | `320` | Width of the left pane on tablets (in dp / points). |
+| `masterListWidth` | `number` | `masterListDefaultWidth` (`320`) | Width of the left pane on tablets (in dp / points). With `resizable`, this is the starting width, and a changed value (for example a persisted width loaded asynchronously) is adopted by the pane. |
+| `masterListDefaultWidth` | `number` | `320` | Width the pane returns to on `reset()` and on a double tap of the resize handle. |
+| `resizable` | `boolean` | `false` | Shows a drag handle on the pane boundary (tablet layouts only) so users can resize the left pane. See [Resizable master pane](#resizable-master-pane). |
+| `masterListMinWidth` | `number` | `240` | Smallest width in dp the user can drag the pane to. Only used with `resizable`. |
+| `masterListMaxWidth` | `number` | `480` | Largest width in dp the user can drag the pane to (also capped to 60% of the window). Only used with `resizable`. |
+| `resizeHandle` | `ReactNode \| ((state: SplitViewResizeHandleState) => ReactNode)` | built-in line and grip | Custom visual for the handle (image, SVG, view). Purely visual: gestures and accessibility stay with `<SplitView>`. |
+| `resizeHandleHitWidth` | `number` | `24` | Width in dp of the handle's touch target, centered on the pane boundary. |
+| `resizeHandleStyle` | `StyleProp<ViewStyle>` | `undefined` | Style for the handle's touch target. |
+| `resetWidthOnDoubleTap` | `boolean` | `true` | Double tapping the handle restores `masterListDefaultWidth`. |
+| `onMasterListResizeStart` | `(width: number) => void` | `undefined` | Called when the user starts dragging, with the width at the start. |
+| `onMasterListResize` | `(width: number) => void` | `undefined` | Called whenever the width changes (continuously while dragging, and for `setWidth` / `reset`). Fires only when the value changes. |
+| `onMasterListResizeEnd` | `(width: number) => void` | `undefined` | Called when a resize completes: the user lets go, or `setWidth` / `reset` changed the width. Use this to persist the width. |
 | `unmountMasterOnPhone` | `boolean` | `false` | Unmounts the left pane (master list and left header) on phones instead of keeping it mounted but hidden. See [Mounting behavior on phones](#mounting-behavior-on-phones). |
 | `tabletBreakpoint` | `number` | `768` | Viewport width threshold (in points) for tablet layout. This is the **only** place the breakpoint is configured: `<SplitView.Placeholder>`, `useSplitView()`, and `useDetailScreenBack()` inside this `<SplitView>` read it automatically (they fall back to `768` outside a `<SplitView>`). |
 | `containerStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the root container. |
@@ -61,6 +73,30 @@ Set `unmountMasterOnPhone` to remove the hidden copy:
 ```
 
 With it enabled, below the breakpoint the left pane (including the built-in or custom `leftHeader`) is not rendered at all, so the master list is mounted only once. State held by the sidebar copy of the master list (scroll position, search text, and so on) is lost when the layout crosses the breakpoint, for example on rotation or window resize, because the pane remounts fresh when it becomes visible again. The right pane and its navigation state are not affected.
+
+### Resizable master pane
+
+Set `resizable` to let users drag the boundary between the panes:
+
+```tsx
+<SplitView
+  masterList={<MasterList />}
+  resizable
+  masterListMinWidth={260}
+  masterListMaxWidth={520}
+  onMasterListResizeEnd={(width) => saveWidth(width)}
+/>
+```
+
+- The handle is rendered only on tablet layouts. It floats over the boundary and takes no layout space.
+- The width is clamped to `masterListMinWidth`..`masterListMaxWidth` and never exceeds 60% of the window. Widths are whole dp values.
+- The width is owned by `<SplitView>`, so it survives phone and tablet transitions (even with `unmountMasterOnPhone`).
+- When `masterListWidth` changes, the pane adopts the new value without firing resize callbacks. This is how a persisted width is restored.
+- RTL layouts are handled: dragging toward the detail pane widens the master pane in both directions.
+- The handle is exposed to assistive technology as an adjustable element ("Resize sidebar"). Increment / decrement actions change the width in steps of 24dp.
+- When `resizable` is `false`, none of this applies and `masterListWidth` behaves exactly as before.
+
+See [Customization](/guide/customization#resizable-master-pane) for persistence and custom handle examples.
 
 ### Stack screen option defaults
 
@@ -221,6 +257,33 @@ A new function identity makes the hook re-apply the header options (`renderBackI
 The hook does not re-render your screen on every navigation event or window resize. It re-renders only when the layout crosses the tablet breakpoint or when its navigation-derived values (whether the master list is in history, whether the stack can go back) change. The returned object is memoized, so it is safe to use in dependency arrays.
 
 
+## `useSplitViewResize()`
+
+Reads and controls the master pane width from any component inside a `<SplitView>` (the master list, detail screens, custom handle content).
+
+```tsx
+import { useSplitViewResize } from 'expo-split-view';
+
+const { resizable, width, minWidth, maxWidth, isResizing, setWidth, reset } = useSplitViewResize();
+```
+
+### Return Value (`UseSplitViewResizeResult`)
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `resizable` | `boolean` | Whether the enclosing `<SplitView>` has `resizable` enabled. |
+| `width` | `number` | Current master pane width in dp. Updates live while dragging. |
+| `minWidth` | `number` | Configured lower bound in dp. |
+| `maxWidth` | `number` | Configured upper bound in dp. |
+| `isResizing` | `boolean` | `true` while the user is dragging the handle (tablet layouts). |
+| `setWidth` | `(width: number) => void` | Sets the width programmatically. The value is clamped to the allowed range and fires `onMasterListResize` and `onMasterListResizeEnd` if it changed. No-op when `resizable` is `false`. |
+| `reset` | `() => void` | Restores `masterListDefaultWidth`. Same callbacks as `setWidth`. |
+
+::: info Behavior Outside SplitView
+Outside a `<SplitView>` the hook returns a read-only default: `resizable: false`, `isResizing: false`, and no-op `setWidth` / `reset`.
+:::
+
+
 ## `useCustomLeftHeader()`
 
 Custom hook for master list components rendered inside the left pane. Use together with `leftHeader={false}` (default) on `<SplitView>` to build your own custom header or back navigation inside the master list.
@@ -289,4 +352,37 @@ export type BackIconProps = {
   size?: number;
   style?: StyleProp<ImageStyle>;
 };
+```
+
+### `SplitViewResizeHandleState`
+
+State passed to a function-style `resizeHandle`:
+
+```tsx
+export interface SplitViewResizeHandleState {
+  /** Current master pane width in dp. */
+  width: number;
+  /** Configured lower bound in dp. */
+  minWidth: number;
+  /** Configured upper bound in dp (the pane is additionally capped to 60% of the window). */
+  maxWidth: number;
+  /** True while the user is dragging the handle. */
+  isResizing: boolean;
+}
+```
+
+### `UseSplitViewResizeResult`
+
+Returned by `useSplitViewResize()`:
+
+```tsx
+export interface UseSplitViewResizeResult {
+  resizable: boolean;
+  width: number;
+  minWidth: number;
+  maxWidth: number;
+  isResizing: boolean;
+  setWidth: (width: number) => void;
+  reset: () => void;
+}
 ```

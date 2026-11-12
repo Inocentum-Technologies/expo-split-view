@@ -1,13 +1,23 @@
 import { Stack, useNavigation, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View, type ColorValue } from 'react-native';
-import type { SplitViewProps } from './types';
+import type { SplitViewProps, SplitViewResizeHandleState, UseSplitViewResizeResult } from './types';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
 import { SplitViewBreakpointContext, useIsWideWindow } from './SplitViewBreakpointContext';
-import { DEFAULT_TABLET_BREAKPOINT } from './constants';
+import { SplitViewResizeContext } from './SplitViewResizeContext';
+import { SplitViewResizeHandle } from './SplitViewResizeHandle';
+import { useMasterListResize } from './useMasterListResize';
+import {
+    DEFAULT_MASTER_LIST_MAX_WIDTH,
+    DEFAULT_MASTER_LIST_MIN_WIDTH,
+    DEFAULT_MASTER_LIST_WIDTH,
+    DEFAULT_RESIZE_HANDLE_HIT_WIDTH,
+    DEFAULT_TABLET_BREAKPOINT,
+    MAX_MASTER_LIST_RATIO,
+} from './constants';
 
 // Stable default references so they are not re-created on every render.
 const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = {
@@ -21,11 +31,14 @@ const DEFAULT_STACK_SCREEN_OPTIONS: NativeStackNavigationOptions = {
     },
 };
 const DEFAULT_SAFE_AREA_EDGES: NonNullable<SplitViewProps['safeAreaEdges']> = ['left', 'right', 'bottom'];
+// The pane is also capped to a share of the window so the detail pane stays usable.
+const MAX_PANE_WIDTH_PERCENT = `${MAX_MASTER_LIST_RATIO * 100}%` as const;
 
 export function SplitView({
     masterList,
     children,
-    masterListWidth = 320,
+    masterListDefaultWidth = DEFAULT_MASTER_LIST_WIDTH,
+    masterListWidth = masterListDefaultWidth,
     unmountMasterOnPhone = false,
     tabletBreakpoint = DEFAULT_TABLET_BREAKPOINT,
     containerStyle,
@@ -41,6 +54,16 @@ export function SplitView({
     leftHeaderTitleAlign,
     leftHeaderTitleStyle,
     leftHeaderStyle,
+    resizable = false,
+    masterListMinWidth = DEFAULT_MASTER_LIST_MIN_WIDTH,
+    masterListMaxWidth = DEFAULT_MASTER_LIST_MAX_WIDTH,
+    resizeHandle,
+    resizeHandleHitWidth = DEFAULT_RESIZE_HANDLE_HIT_WIDTH,
+    resizeHandleStyle,
+    resetWidthOnDoubleTap = true,
+    onMasterListResizeStart,
+    onMasterListResize,
+    onMasterListResizeEnd,
 }: SplitViewProps) {
     const theme = useTheme();
     // Re-renders only when the window width crosses the breakpoint, not on every resize tick.
@@ -50,6 +73,51 @@ export function SplitView({
     // With `unmountMasterOnPhone` it is removed entirely, so the master list is only
     // mounted once (by SplitView.Placeholder inside the stack).
     const showLeftPane = isTablet || !unmountMasterOnPhone;
+
+    // Owns the pane width. The width survives phone <-> tablet transitions because the
+    // state lives here, not in the (possibly unmounted) left pane.
+    const resize = useMasterListResize({
+        enabled: resizable,
+        width: masterListWidth,
+        defaultWidth: masterListDefaultWidth,
+        minWidth: masterListMinWidth,
+        maxWidth: masterListMaxWidth,
+        resetOnDoubleTap: resetWidthOnDoubleTap,
+        onResizeStart: onMasterListResizeStart,
+        onResize: onMasterListResize,
+        onResizeEnd: onMasterListResizeEnd,
+    });
+    const leftPaneWidth = resize.width;
+    const isResizing = resize.isResizing && isTablet;
+    const { setWidth: setPaneWidth, reset: resetPaneWidth } = resize;
+
+    const resizeContextValue = useMemo<UseSplitViewResizeResult>(
+        () => ({
+            resizable,
+            width: leftPaneWidth,
+            minWidth: masterListMinWidth,
+            maxWidth: masterListMaxWidth,
+            isResizing,
+            setWidth: setPaneWidth,
+            reset: resetPaneWidth,
+        }),
+        [resizable, leftPaneWidth, masterListMinWidth, masterListMaxWidth, isResizing, setPaneWidth, resetPaneWidth]
+    );
+
+    const handleState = useMemo<SplitViewResizeHandleState>(
+        () => ({
+            width: leftPaneWidth,
+            minWidth: masterListMinWidth,
+            maxWidth: masterListMaxWidth,
+            isResizing,
+        }),
+        [leftPaneWidth, masterListMinWidth, masterListMaxWidth, isResizing]
+    );
+
+    const nudgeWidth = useCallback(
+        (delta: number) => setPaneWidth(leftPaneWidth + delta),
+        [setPaneWidth, leftPaneWidth]
+    );
 
     // Fill all safe-area padding gutters (status-bar strip, camera-cutout gap,
     // home-indicator strip) with the theme background so they never show a
@@ -95,6 +163,9 @@ export function SplitView({
         };
     }, [stackScreenOptions]);
 
+    const customHandle =
+        typeof resizeHandle === 'function' ? resizeHandle(handleState) : resizeHandle;
+
     return (
         // SafeAreaView applies the correct platform insets for the requested edges
         // automatically — no manual useSafeAreaInsets math required.
@@ -110,62 +181,81 @@ export function SplitView({
                 without it being passed again.
             */}
             <SplitViewBreakpointContext.Provider value={tabletBreakpoint}>
-                {/*
-                    The Master pane stays mounted at all times to preserve component states
-                    (unless `unmountMasterOnPhone` is set).
-                    On tablet, it sits on the left with fixed width.
-                    On phone, it is hidden with display: 'none' and width: 0.
-                    SafeAreaView's left-edge inset pushes the entire row, so the left
-                    pane naturally starts after the camera cutout — no width math needed.
-                */}
-                {showLeftPane && (
+                {/* Lets any descendant read the live pane width via `useSplitViewResize()`. */}
+                <SplitViewResizeContext.Provider value={resizeContextValue}>
+                    {/*
+                        The Master pane stays mounted at all times to preserve component states
+                        (unless `unmountMasterOnPhone` is set).
+                        On tablet, it sits on the left with the current (resizable) width.
+                        On phone, it is hidden with display: 'none' and width: 0.
+                        SafeAreaView's left-edge inset pushes the entire row, so the left
+                        pane naturally starts after the camera cutout — no width math needed.
+                    */}
+                    {showLeftPane && (
+                        <View
+                            style={[
+                                styles.leftPane,
+                                {
+                                    borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
+                                    backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
+                                    width: leftPaneWidth,
+                                },
+                                resizable && { maxWidth: MAX_PANE_WIDTH_PERCENT },
+                                !isTablet && styles.hiddenPane,
+                                masterStyle,
+                            ]}
+                        >
+                            <SplitViewLocationContext.Provider value="sidebar">
+                                <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
+                                    {leftHeader === true && (
+                                        <SplitViewSidebarHeader
+                                            title={leftHeaderTitle}
+                                            renderBackIcon={renderBackIcon}
+                                            backIconColor={leftHeaderBackIconColor}
+                                            height={leftHeaderHeight}
+                                            canGoBack={canGoBack}
+                                            onBack={goBack}
+                                            titleAlign={leftHeaderTitleAlign}
+                                            titleStyle={leftHeaderTitleStyle}
+                                            headerStyle={leftHeaderStyle}
+                                        />
+                                    )}
+                                    {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
+                                    {masterList}
+                                </SplitViewLeftHeaderContext.Provider>
+                            </SplitViewLocationContext.Provider>
+                        </View>
+                    )}
+
+                    {/*
+                        Drag handle on the pane boundary. Only on tablet layouts, where both panes
+                        are visible. It takes no layout space and floats above both panes.
+                    */}
+                    {resizable && isTablet && (
+                        <SplitViewResizeHandle
+                            state={handleState}
+                            hitWidth={resizeHandleHitWidth}
+                            panHandlers={resize.panHandlers}
+                            content={customHandle}
+                            style={resizeHandleStyle}
+                            onNudge={nudgeWidth}
+                        />
+                    )}
+
+                    {/*
+                        The Detail pane holds the active screens.
+                        When rotating, the stack stays mounted so user inputs and scroll states persist.
+                    */}
                     <View
                         style={[
-                            styles.leftPane,
-                            {
-                                borderColor: (theme?.colors?.border ?? '#e0e0e0') as ColorValue,
-                                backgroundColor: (theme?.colors?.card ?? '#ffffff') as ColorValue,
-                                width: masterListWidth,
-                            },
-                            !isTablet && styles.hiddenPane,
-                            masterStyle,
+                            styles.rightPane,
+                            { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
+                            detailStyle,
                         ]}
                     >
-                        <SplitViewLocationContext.Provider value="sidebar">
-                            <SplitViewLeftHeaderContext.Provider value={leftHeaderValue}>
-                                {leftHeader === true && (
-                                    <SplitViewSidebarHeader
-                                        title={leftHeaderTitle}
-                                        renderBackIcon={renderBackIcon}
-                                        backIconColor={leftHeaderBackIconColor}
-                                        height={leftHeaderHeight}
-                                        canGoBack={canGoBack}
-                                        onBack={goBack}
-                                        titleAlign={leftHeaderTitleAlign}
-                                        titleStyle={leftHeaderTitleStyle}
-                                        headerStyle={leftHeaderStyle}
-                                    />
-                                )}
-                                {typeof leftHeader === 'function' && leftHeader({ canGoBack, goBack })}
-                                {masterList}
-                            </SplitViewLeftHeaderContext.Provider>
-                        </SplitViewLocationContext.Provider>
+                        {children ?? <Stack screenOptions={resolvedStackScreenOptions} />}
                     </View>
-                )}
-
-                {/*
-                    The Detail pane holds the active screens.
-                    When rotating, the stack stays mounted so user inputs and scroll states persist.
-                */}
-                <View
-                    style={[
-                        styles.rightPane,
-                        { backgroundColor: (theme?.colors?.background ?? '#ffffff') as ColorValue },
-                        detailStyle,
-                    ]}
-                >
-                    {children ?? <Stack screenOptions={resolvedStackScreenOptions} />}
-                </View>
+                </SplitViewResizeContext.Provider>
             </SplitViewBreakpointContext.Provider>
         </SafeAreaView>
     );

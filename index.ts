@@ -11,6 +11,8 @@ export * from './src/useDetailScreenBack';
 export * from './src/useCustomLeftHeader';
 export * from './src/SplitViewLeftHeaderContext';
 export * from './src/BackIcon';
+// Only the hook is public; the context object and the drag logic stay internal.
+export { useSplitViewResize } from './src/SplitViewResizeContext';
 
 /**
  * Compound component for SplitView layout.

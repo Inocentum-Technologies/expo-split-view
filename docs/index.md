@@ -31,6 +31,8 @@ features:
     details: Gracefully handles transitions from tablet to mobile when router.replace leaves the stack without a root index screen. Injects custom header back button and edge-swipe gestures.
   - title: Compound Component API
     details: Clean, declarative compound components (SplitView, SplitView.Placeholder, SplitView.Detail) as well as direct named exports.
+  - title: Resizable Master Pane
+    details: Opt-in drag handle lets users resize the left pane within min/max limits. Listen for changes to persist the width, and swap in your own handle (image, SVG, or any view) to match your design.
   - title: Expo Go & Web Ready
     details: Built with standard React Native and Expo Router primitives with zero native build dependencies. Works across iOS, Android, and Web out of the box.
 ---
