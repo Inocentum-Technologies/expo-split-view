@@ -40,6 +40,8 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 - 📐 **Adaptive split layout:** side-by-side master-detail on tablets, desktops, and wide viewports; native full-screen stack on phones
 - 🧠 **State preserved across form factors:** inputs, search queries, and scroll positions survive rotation and foldable unfolding
 - 🧭 **Smart responsive navigation:** `useSplitView().navigate` uses `replace` on tablets and `push` on phones
+- ↔️ **Resizable master pane:** opt-in drag handle (`resizable`) with min/max limits, double-tap reset, and a fully customizable handle (image, SVG, or any view)
+- 💾 **Persistable pane width:** `onMasterListResizeEnd` and `useSplitViewResize()` let you save and restore the width the user chose
 - ⬅️ **Sidebar header & outer back navigation:** built-in or custom left-pane header that safely pops the host screen
 - 📱 **Resilient mobile back handling:** injected header back button, Android hardware back, and edge-swipe gesture support
 - 🛡️ **Safe area management:** configurable `safeAreaEdges` that clear cutouts and home indicators without double padding

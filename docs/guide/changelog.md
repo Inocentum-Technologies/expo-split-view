@@ -2,6 +2,25 @@
 
 All notable changes to `expo-split-view`, newest first. Releases are published on [npm](https://www.npmjs.com/package/expo-split-view).
 
+## Unreleased
+
+### 🚀 What's New
+
+#### ↔️ Resizable master pane
+- New opt-in `resizable` prop on `<SplitView>` (default `false`, so existing apps behave exactly as before). On tablet layouts a drag handle sits on the boundary between the panes and lets the user change the master pane width.
+- **Limits:** `masterListMinWidth` (default `240`) and `masterListMaxWidth` (default `480`). The pane is additionally capped to 60% of the window so the detail pane stays usable.
+- **Listeners:** `onMasterListResizeStart`, `onMasterListResize` (live, while dragging) and `onMasterListResizeEnd` (when the user lets go). Use `onMasterListResizeEnd` to persist the width.
+- **Restoring a saved width:** pass it as `masterListWidth`. The pane adopts the new value whenever the prop changes, so an async storage read works. `masterListDefaultWidth` (default `320`) is what reset returns to.
+- **Custom handle:** `resizeHandle` accepts any element (an `<Image>`, an SVG, a `<View>`) or a function receiving `{ width, minWidth, maxWidth, isResizing }`. `resizeHandleHitWidth` and `resizeHandleStyle` control the touch target.
+- **Double tap to reset:** a double tap on the handle restores `masterListDefaultWidth` (turn off with `resetWidthOnDoubleTap={false}`).
+- **`useSplitViewResize()`:** new hook returning `{ resizable, width, minWidth, maxWidth, isResizing, setWidth, reset }` for any component inside a `<SplitView>`.
+- Also works with RTL layouts and web mouse dragging, and exposes accessibility increment / decrement actions on the handle.
+- See [Resizable master pane](/guide/customization#resizable-master-pane) and the [API reference](/api/reference#resizable-master-pane).
+
+### 🔄 Behavior notes
+
+- `masterListWidth` now defaults to `masterListDefaultWidth` (still `320`), and the pane adopts new values of the prop at runtime. Apps that only set a fixed `masterListWidth` are unaffected.
+
 ## 0.0.4-rc.1
 
 ::: warning Breaking change

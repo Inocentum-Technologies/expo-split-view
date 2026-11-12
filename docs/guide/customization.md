@@ -193,6 +193,154 @@ const styles = StyleSheet.create({
 
 On tablet, `canGoBack` is `true` when the screen hosting the split view has a previous screen in the outer navigator. On mobile (or outside the left pane), `canGoBack` is `false` and `goBack` is a safe no-op.
 
+## Resizable Master Pane
+
+Let users drag the boundary between the panes to make the master list wider or narrower. The feature is off by default. Enable it with `resizable`:
+
+```tsx
+// app/items/_layout.tsx
+<SplitView
+  masterList={<MasterList />}
+  resizable
+  masterListMinWidth={260}
+  masterListMaxWidth={520}
+/>
+```
+
+The handle only appears on tablet layouts, where both panes are visible. The chosen width is kept when the layout switches to phone and back. Dragging is clamped to `masterListMinWidth` / `masterListMaxWidth`, and the pane never takes more than 60% of the window. A double tap on the handle restores `masterListDefaultWidth` (disable with `resetWidthOnDoubleTap={false}`).
+
+### Persisting the width
+
+`onMasterListResizeEnd` fires once when the user lets go of the handle (and after a programmatic `setWidth` / `reset` that changed the width), which makes it the right place to save. Feed the saved value back through `masterListWidth`: the pane adopts it whenever the prop changes, so loading from async storage works.
+
+```tsx
+// app/items/_layout.tsx
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SplitView } from 'expo-split-view';
+
+const STORAGE_KEY = 'items.sidebarWidth';
+const DEFAULT_WIDTH = 320;
+
+export default function ItemsLayout() {
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
+
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
+      if (saved) setWidth(Number(saved));
+    });
+  }, []);
+
+  return (
+    <SplitView
+      masterList={<MasterList />}
+      resizable
+      masterListWidth={width}
+      masterListDefaultWidth={DEFAULT_WIDTH}
+      onMasterListResizeEnd={(w) => AsyncStorage.setItem(STORAGE_KEY, String(w))}
+    />
+  );
+}
+```
+
+| Callback | When it fires |
+| :--- | :--- |
+| `onMasterListResizeStart(width)` | The user starts dragging. |
+| `onMasterListResize(width)` | Every time the width changes, continuously while dragging. Debounce before persisting from here. |
+| `onMasterListResizeEnd(width)` | The user lets go, or `setWidth` / `reset` changed the width. Use this to persist. |
+
+Widths are whole dp values, and callbacks fire only when the value actually changes.
+
+::: tip
+`masterListDefaultWidth` is separate from `masterListWidth` so a persisted value does not become the "reset" target. Reset and double tap always go back to `masterListDefaultWidth`.
+:::
+
+### Custom handle
+
+Pass `resizeHandle` to replace the built-in line and grip. It accepts any element (an image, an SVG, a `<View>`) or a function that receives the live state, so you can react to dragging:
+
+```tsx
+import { Image, View } from 'react-native';
+import Svg, { Rect } from 'react-native-svg';
+
+// Static image
+<SplitView
+  masterList={<MasterList />}
+  resizable
+  resizeHandle={
+    <Image source={require('@/assets/grip.png')} style={{ width: 8, height: 40 }} />
+  }
+/>
+
+// SVG that reacts to dragging
+<SplitView
+  masterList={<MasterList />}
+  resizable
+  resizeHandle={({ isResizing }) => (
+    <Svg width={6} height={40}>
+      <Rect width={6} height={40} rx={3} fill={isResizing ? '#4F46E5' : '#9CA3AF'} />
+    </Svg>
+  )}
+/>
+
+// Plain View
+<SplitView
+  masterList={<MasterList />}
+  resizable
+  resizeHandle={({ isResizing }) => (
+    <View
+      style={{
+        width: isResizing ? 4 : 2,
+        height: '100%',
+        backgroundColor: isResizing ? '#4F46E5' : '#D1D5DB',
+      }}
+    />
+  )}
+/>
+```
+
+Things to know about a custom handle:
+- The content is purely visual and is centered on the pane boundary. `<SplitView>` still owns the gestures, the touch target and the accessibility actions, so the content never receives touches.
+- The touch target is `resizeHandleHitWidth` wide (default `24`) and overlaps both panes by half its width each. Use `resizeHandleStyle` to adjust it, for example `{ backgroundColor: '#0001' }` to see it while designing.
+- The handle takes no layout space, so it never changes the pane widths on its own.
+- A function-style `resizeHandle` is re-evaluated on each state change. Keep it cheap, or return a memoized component.
+
+### Reading and controlling the width (`useSplitViewResize`)
+
+Any component inside a `<SplitView>` (the master list, detail screens, custom handle content) can read the live width and change it:
+
+```tsx
+import { Pressable, Text } from 'react-native';
+import { useSplitViewResize } from 'expo-split-view';
+
+export function SidebarControls() {
+  const { resizable, width, minWidth, maxWidth, setWidth, reset } = useSplitViewResize();
+
+  if (!resizable) return null;
+
+  return (
+    <>
+      <Text>Sidebar: {width}dp</Text>
+      <Pressable onPress={() => setWidth(maxWidth)}>
+        <Text>Widest</Text>
+      </Pressable>
+      <Pressable onPress={() => setWidth(minWidth)}>
+        <Text>Narrowest</Text>
+      </Pressable>
+      <Pressable onPress={reset}>
+        <Text>Reset</Text>
+      </Pressable>
+    </>
+  );
+}
+```
+
+`setWidth` clamps to the allowed range and triggers the same `onMasterListResize` / `onMasterListResizeEnd` callbacks as a drag. Outside a `<SplitView>` the hook returns a read-only default with `resizable: false`.
+
+::: info Accessibility
+The handle is exposed as an adjustable element named "Resize sidebar". Screen reader increment / decrement actions change the width in steps of 24dp.
+:::
+
 ## Safe Area Configuration (`safeAreaEdges`)
 
 `<SplitView>` uses `SafeAreaView` from `react-native-safe-area-context` to safely handle device insets across orientations.

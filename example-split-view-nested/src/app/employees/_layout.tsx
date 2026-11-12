@@ -17,6 +17,9 @@ export default function EmployeesLayout() {
       leftHeader
       leftHeaderTitle="Employees"
       masterStyle={{ paddingLeft: insets.left }}
+      resizable
+      // This can be used to persist the changes if needed.
+      onMasterListResizeEnd={width => console.log(width)}
     />
   );
 }
