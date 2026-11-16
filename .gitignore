@@ -7,3 +7,4 @@ web-build/
 docs/.vitepress/dist
 docs/.vitepress/cache
 todo
+.commandcode
