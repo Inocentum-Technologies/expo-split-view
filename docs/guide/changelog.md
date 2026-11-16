@@ -24,6 +24,7 @@ All notable changes to `expo-split-view`, newest first. Releases are published o
 - Fallback navigation uses `router.dismissTo()`, which pops when the target is in history and otherwise navigates to it, keeping browser history coherent.
 - Master-list detection no longer mistakes dynamic routes such as `[id]/index` for the index screen.
 - The injected back button now takes its default tint from the navigation theme (like the native header) instead of the raw system color scheme, so the arrow stays visible when the OS scheme and the app theme differ (for example dark OS with a light header).
+- On tablet, selecting a master-list item after a reload or direct URL load now drops the directly loaded pane stack before replacing it. Back from the new item always returns to the placeholder, never to the previously viewed item's detail or subpage.
 - On web, the injected back button now matches the native header's left inset instead of sitting flush against the pane divider.
 - Stack history detection tolerates Expo Router 58's tree state, which can omit `type`. An anchor (`unstable_settings.anchor`) now correctly suppresses the injected button because the native one is present.
 - Docs recommend `unstable_settings = { anchor: 'index' }` (or `initialRouteName` on older Expo Router versions) on the layout that renders the split view as the most robust option. See [Reload and direct URLs](/api/reference#reload-and-direct-urls).

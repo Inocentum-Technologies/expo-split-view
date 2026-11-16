@@ -347,7 +347,10 @@ export interface UseSplitViewResult {
     width: number;
     /**
      * Navigates to a detail route:
-     * - On tablet: dismisses any pushed subpages and calls `router.replace(href)` so right-pane history does not accumulate across items.
+     * - On tablet: keeps the placeholder as the pane root, replaces the current first-level
+     *   detail with `href`, and dismisses any subpage above it. If the pane was opened
+     *   directly on a detail/subpage, that stack is dropped first so Back never returns to
+     *   the previously viewed item's screens.
      * - On phone: calls `router.push(href)` to push onto the stack natively.
      */
     navigate: (href: Href) => void;

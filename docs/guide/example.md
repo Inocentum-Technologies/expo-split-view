@@ -68,7 +68,7 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 
 ### 5. Detail Screen & Subpage Navigation
 - Select any framework to inspect its comprehensive overview, key highlights, metadata, or visit the official framework documentation.
-- Navigate deeper to subpages (`src/app/(home)/subpage.tsx`) inside the right pane. When a different framework is clicked in the master list, `useSplitView` dismisses subpages so the newly selected item starts fresh.
+- Navigate deeper to subpages (`src/app/(home)/subpage.tsx`) inside the right pane. When a different framework is clicked in the master list, `useSplitView` dismisses subpages so the newly selected item starts fresh. The same applies after a reload or direct URL load: the directly loaded stack is dropped, so Back from the new item returns to the placeholder instead of the previous item's subpage.
 
 ### 6. Edge Inset & Theme Adaptation
 - Uses `safeAreaEdges={['left', 'right']}` to cleanly handle landscape cutouts without adding redundant top padding.
