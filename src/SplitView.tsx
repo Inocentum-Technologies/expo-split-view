@@ -1,11 +1,13 @@
-import { Stack, useNavigation, useTheme, type NativeStackNavigationOptions } from 'expo-router';
+import { Stack, useTheme, type NativeStackNavigationOptions } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View, type ColorValue } from 'react-native';
 import type { SplitViewProps, SplitViewResizeHandleState, UseSplitViewResizeResult } from './types';
 import { SplitViewLocationContext } from './SplitViewLocationContext';
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useMemo } from 'react';
 import { SplitViewSidebarHeader } from './SplitViewSidebarHeader';
 import { SplitViewLeftHeaderContext } from './SplitViewLeftHeaderContext';
+import { SplitViewFallbackContext } from './SplitViewFallbackContext';
+import { useSplitViewHostBack } from './useSplitViewHostBack';
 import { SplitViewBreakpointContext, useIsWideWindow } from './SplitViewBreakpointContext';
 import { SplitViewResizeContext } from './SplitViewResizeContext';
 import { SplitViewResizeHandle } from './SplitViewResizeHandle';
@@ -64,6 +66,7 @@ export function SplitView({
     onMasterListResizeStart,
     onMasterListResize,
     onMasterListResizeEnd,
+    fallbackRoute,
 }: SplitViewProps) {
     const theme = useTheme();
     // Re-renders only when the window width crosses the breakpoint, not on every resize tick.
@@ -124,24 +127,13 @@ export function SplitView({
     // jarring white/default colour in dark mode.
     const gutterBg = (theme?.colors?.background ?? '#ffffff') as ColorValue;
 
-    // Outer stack: confirmed by your log (routes: ["index", "home"]).
-    const navigation = useNavigation();
-
-    // canGoBack is derived from the outer stack state. Subscribing through
-    // useSyncExternalStore re-renders only when the boolean actually flips
-    // (instead of on every pathname change), and it re-checks the snapshot right
-    // after mount, so a not-yet-complete state during the first render is corrected.
-    const subscribeToNavState = useCallback(
-        (notify: () => void) => navigation.addListener('state', notify),
-        [navigation]
-    );
-    const getCanGoBack = useCallback(() => {
-        const s = navigation.getState();
-        return !!s && s.type === 'stack' && s.index > 0;
-    }, [navigation]);
-    const canGoBack = useSyncExternalStore(subscribeToNavState, getCanGoBack, getCanGoBack);
-
-    const goBack = useCallback(() => navigation.goBack(), [navigation]);
+    // Back state for the screen hosting this SplitView. When the outer stack has no
+    // history (reload / direct URL), this falls back to the host's logical parent.
+    const {
+        canGoBack,
+        goBack,
+        fallbackRoute: resolvedFallbackRoute,
+    } = useSplitViewHostBack(fallbackRoute);
 
     // after canGoBack and goBack are defined
     const leftHeaderValue = useMemo(() => ({ canGoBack, goBack }), [canGoBack, goBack]);
@@ -253,7 +245,10 @@ export function SplitView({
                             detailStyle,
                         ]}
                     >
-                        {children ?? <Stack screenOptions={resolvedStackScreenOptions} />}
+                        {/* Shares the host fallback with the phone placeholder. */}
+                        <SplitViewFallbackContext.Provider value={resolvedFallbackRoute}>
+                            {children ?? <Stack screenOptions={resolvedStackScreenOptions} />}
+                        </SplitViewFallbackContext.Provider>
                     </View>
                 </SplitViewResizeContext.Provider>
             </SplitViewBreakpointContext.Provider>

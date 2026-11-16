@@ -16,6 +16,7 @@ export default function EmployeesLayout() {
       safeAreaEdges={[]}
       leftHeader
       leftHeaderTitle="Employees"
+      fallbackRoute="/"
       masterStyle={{ paddingLeft: insets.left }}
       resizable
       // This can be used to persist the changes if needed.

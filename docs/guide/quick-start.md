@@ -113,6 +113,14 @@ export default function ItemDetailScreen() {
 }
 ```
 
+::: tip Reload and direct URLs
+After a web reload or direct link there is no in-app history. Export
+`unstable_settings = { anchor: 'index' }` (or `initialRouteName` on older versions)
+from the layout that renders `<SplitView>` so Expo Router rebuilds the missing
+routes; without anchors, the module falls back to the URL's logical parent for the
+sidebar, detail header and phone placeholder. See [Reload and direct URLs](/guide/getting-started#reload-and-direct-urls).
+:::
+
 ## Next Steps
 
 - Check out [Customization](/guide/customization) to tailor placeholder content, back options, and header icons.

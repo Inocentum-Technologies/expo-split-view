@@ -139,6 +139,15 @@ export interface SplitViewProps {
      */
     tabletBreakpoint?: number;
     /**
+     * Where the left sidebar back button (and the phone placeholder) go when the
+     * hosting screen has no previous route, for example after a browser reload or
+     * a direct URL load.
+     *
+     * Defaults to the inferred parent of the host layout. When the host is the app
+     * root there is no parent, so no back button is shown.
+     */
+    fallbackRoute?: Href;
+    /**
      * Style override for the outermost container view.
      */
     containerStyle?: StyleProp<ViewStyle>;
@@ -234,8 +243,9 @@ export interface SplitViewPlaceholderProps {
 
 export interface UseDetailScreenBackOptions {
     /**
-     * Route to navigate back to if the master list index is not in the history stack.
-     * If omitted, it automatically resolves to the parent route inferred from the current segments.
+     * Route to navigate back to when there is no previous route in this stack.
+     * If omitted, it resolves to the parent of `usePathname()` (route groups stripped,
+     * dynamic params resolved). Search params are not preserved.
      */
     fallbackRoute?: Href;
     /**
@@ -264,7 +274,7 @@ export interface UseDetailScreenBackOptions {
      */
     isMasterRoute?: (routeName: string) => boolean;
     /**
-     * Optional custom fallback action called instead of `router.replace(targetFallback)`.
+     * Optional custom fallback action called instead of `router.dismissTo(targetFallback)`.
      * Useful for custom navigators, bottom sheets, or custom modal dismissals.
      */
     onFallback?: () => void;
@@ -280,7 +290,12 @@ export interface UseDetailScreenBackOptions {
 
 export interface UseDetailBackResult {
     /**
-     * Whether the custom back handling is active (Mobile View & master list index not in stack history).
+     * Whether the custom back handling is active: this stack has no previous route, but the
+     * screen has a logical parent (reload / direct URL). Applies to phone and tablet.
+     */
+    showCustomBack: boolean;
+    /**
+     * Phone-only alias of `showCustomBack`. Kept for backwards compatibility.
      */
     showCustomMobileBack: boolean;
     /**
@@ -297,6 +312,8 @@ export interface UseDetailBackResult {
     isTablet: boolean;
     /**
      * Whether the master list route is present in the stack's navigation history.
+     * Dynamic routes such as `[id]/index` are not treated as the master list. This no
+     * longer gates the back handling; use `showCustomBack`.
      */
     hasIndexInHistory: boolean;
     /**

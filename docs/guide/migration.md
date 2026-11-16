@@ -44,6 +44,26 @@ The built-in sidebar header (`leftHeader={true}`) now picks its default height f
 
 The default options for the right-pane `<Stack />` now also include native header inset flags (`unstable_nativeProps.headerConfig`). Your `stackScreenOptions` are merged over the defaults, so options you already pass keep working. See [Stack screen option defaults](/api/reference#stack-screen-option-defaults).
 
+### Back navigation after reload / direct URLs
+
+Fallback targets are now derived from `usePathname()` instead of `useSegments()`, so
+route groups are stripped and dynamic params are resolved. The old inference could
+produce a literal `/(group)/[id]` path on reload.
+
+- `<SplitView>` gained `fallbackRoute`. When the outer stack has no history, the
+  sidebar back button goes to the inferred parent of the host layout (or the prop).
+  It is now shown (and works) where it previously did nothing.
+- `useCustomLeftHeader().canGoBack` can now be `true` when a logical parent exists,
+  even without outer history. `goBack()` navigates to that fallback in that case.
+- `useDetailScreenBack()` injects its header back button on tablets too, not only
+  on phones. `showCustomMobileBack` remains as the phone-only alias of the new
+  `showCustomBack`.
+- Dynamic routes such as `[id]/index` are no longer mistaken for the master list
+  when checking history.
+
+If your app relied on the previous fallback path, pass `fallbackRoute` explicitly.
+See [Reload and direct URLs](/api/reference#reload-and-direct-urls).
+
 ### Requirements
 
 `react` 18 or newer is now declared as a peer dependency.

@@ -12,7 +12,7 @@ Supports **Android**, **iOS**, and **Web**, and works in **Expo Go** out of the 
 - **Left Sidebar Header & Outer Back Navigation:** Optional built-in or custom header for the master pane that hooks into the outer navigator (`canGoBack` / `goBack`), safely popping the screen hosting the split view without disturbing right-pane navigation.
 - **Resizable Master Pane:** Opt-in (`resizable`) drag handle on the pane boundary so users can make the left pane wider or narrower within limits you set. Resize callbacks and the `useSplitViewResize()` hook let you persist the width, and the handle's look is fully customizable. See [Resizable master pane](/guide/customization#resizable-master-pane).
 - **Safe Area Inset Management:** Configurable edge insets via `safeAreaEdges` that safely clear landscape cutouts and home indicators while preventing double status-bar top padding in Expo Router stacks.
-- **Resilient Mobile Back Navigation:** Intervenes only on mobile when `router.replace` on a tablet leaves the phone stack without a root `index` screen in history. Automatically injects a header back button, listens to the Android hardware back button, and binds edge-swipe gestures.
+- **Resilient Back Navigation:** Works when `router.replace` on a tablet leaves the stack without the master list in history, and after a web reload or direct URL load where there is no in-app history at all. Injects a header back button when the native one would be missing, listens to the Android hardware back button, and binds edge-swipe gestures.
 - **Compound Component API:** Provides clean, declarative compound components (`<SplitView>`, `<SplitView.Placeholder>`, `<SplitView.Detail>`) as well as direct named exports.
 - **Expo Go & Web Ready:** Built using standard React Native and Expo Router primitives with zero native build dependencies.
 
@@ -88,3 +88,29 @@ On phones:
 ::: tip Avoid the duplicate master list on phones
 Because the hidden left pane stays mounted, your master list is mounted twice on phones (hidden in the left pane, and full-screen by `<SplitView.Placeholder>`), so its effects and data fetching run twice. If that matters, pass `unmountMasterOnPhone` to `<SplitView>` to unmount the hidden copy. The trade-off is that the sidebar copy's state (scroll position, search text) is lost when the layout crosses the breakpoint. See [Mounting behavior on phones](/api/reference#mounting-behavior-on-phones).
 :::
+
+### Reload and direct URLs
+
+On web, Expo Router rebuilds navigation state from the URL alone. A reload or a
+direct link therefore has no in-app history, and the native headers have nothing
+to go back to. Two things keep back navigation working:
+
+1. **Anchors (recommended).** Export `anchor` from the layout that renders the
+   split view (and from any nested stack layout you add) so Expo Router recreates
+   the missing routes on reload. Older Expo Router versions call it
+   `initialRouteName`.
+
+   ```tsx
+   // app/items/_layout.tsx — the layout that renders <SplitView>
+   export const unstable_settings = { anchor: 'index' };
+   ```
+
+2. **Module fallbacks.** Without anchors, the module derives a logical parent from
+   the real URL (route groups stripped, params resolved). The sidebar back button,
+   the detail header and the phone placeholder use it when the stack has no
+   history. Pass `fallbackRoute` to `<SplitView>` when the host's parent cannot be
+   inferred, and use the `fallbackRoute` option of `useDetailScreenBack` for
+   sub-pages whose parent is not simply the previous URL segment.
+
+See [Reload and direct URLs](/api/reference#reload-and-direct-urls) in the API
+reference for the exact behavior.
