@@ -18,21 +18,18 @@ All notable changes to `expo-split-view`, newest first. Releases are published o
 - See [Resizable master pane](/guide/customization#resizable-master-pane) and the [API reference](/api/reference#resizable-master-pane).
 
 #### 🔙 Back navigation after reload and direct URLs
-- On web, a reload or direct URL load has no in-app history. The sidebar back button, the detail header and the phone placeholder now derive a **logical parent** from the real URL (`usePathname()`, so route groups are stripped and dynamic params resolved) and navigate there instead of showing nothing.
+- On web, a reload or direct URL load has no in-app history. The sidebar back button, the detail header and the phone placeholder derive a **logical parent** from the real URL (`usePathname()`, so route groups are stripped and dynamic params resolved) and navigate there.
 - New `<SplitView fallbackRoute>` prop overrides the inferred parent for the sidebar and phone placeholder. The default is the host layout's parent; a root host shows no button.
-- `useDetailScreenBack()` now injects its header back button on **tablets** as well as phones whenever the pane stack has no previous route but a logical parent exists. A new `showCustomBack` result field exposes the combined condition; `showCustomMobileBack` remains as the phone-only alias.
+- `useDetailScreenBack()` injects its header back button on **tablets** as well as phones whenever the pane stack has no previous route but a logical parent exists. A new `showCustomBack` result field exposes the combined condition; `showCustomMobileBack` remains as the phone-only alias.
+- The injected button follows the navigation theme and matches the native header's left inset. An anchor (`unstable_settings.anchor`) suppresses it, since the native button is then present.
 - Fallback navigation uses `router.dismissTo()`, which pops when the target is in history and otherwise navigates to it, keeping browser history coherent.
-- Master-list detection no longer mistakes dynamic routes such as `[id]/index` for the index screen.
-- The injected back button now takes its default tint from the navigation theme (like the native header) instead of the raw system color scheme, so the arrow stays visible when the OS scheme and the app theme differ (for example dark OS with a light header).
-- On tablet, selecting a master-list item after a reload or direct URL load now drops the directly loaded pane stack before replacing it. Back from the new item always returns to the placeholder, never to the previously viewed item's detail or subpage.
-- On web, the injected back button now matches the native header's left inset instead of sitting flush against the pane divider.
-- Stack history detection tolerates Expo Router 58's tree state, which can omit `type`. An anchor (`unstable_settings.anchor`) now correctly suppresses the injected button because the native one is present.
+- Master-list detection ignores route groups and never mistakes dynamic routes such as `[id]/index` for the index screen.
+- On tablet, selecting a master-list item after a reload or direct URL load replaces the loaded pane stack, so Back returns to the placeholder rather than the previously viewed detail.
 - Docs recommend `unstable_settings = { anchor: 'index' }` (or `initialRouteName` on older Expo Router versions) on the layout that renders the split view as the most robust option. See [Reload and direct URLs](/api/reference#reload-and-direct-urls).
 
 ### 🔄 Behavior notes
 
-- `masterListWidth` now defaults to `masterListDefaultWidth` (still `320`), and the pane adopts new values of the prop at runtime. Apps that only set a fixed `masterListWidth` are unaffected.
-- `useCustomLeftHeader().canGoBack` is now also `true` when the host has a logical parent fallback (reload / direct URL), and `goBack()` navigates there when there is no outer history.
+- `useCustomLeftHeader().canGoBack` is also `true` when the host has a logical parent fallback (reload / direct URL), and `goBack()` navigates there when there is no outer history.
 
 ## 0.0.4-rc.1
 
