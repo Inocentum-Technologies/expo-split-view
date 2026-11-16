@@ -50,6 +50,13 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 ### 3. Android Emulator
 - Run on a tablet emulator, phone emulator, or foldable device.
 
+### 4. Reload / direct URL (web)
+Open `/employees/123` directly (no in-app history). On tablet the sidebar arrow
+returns to `/` and the detail header arrow returns to `/employees`; on phone the
+detail header arrow does the same. The nested example deliberately omits anchors
+so the module's URL-derived fallback is exercised (`fallbackRoute="/"` is set on
+the `<SplitView>`).
+
 ---
 
 ## App Architecture & Routing

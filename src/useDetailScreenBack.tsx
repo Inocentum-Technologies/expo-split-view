@@ -2,8 +2,8 @@ import {
     type Href,
     useFocusEffect,
     useNavigation,
+    usePathname,
     useRouter,
-    useSegments,
 } from 'expo-router';
 import {
     useCallback,
@@ -12,17 +12,11 @@ import {
     useRef,
     useSyncExternalStore,
 } from 'react';
-import {
-    BackHandler,
-    PanResponder,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-} from 'react-native';
+import { BackHandler, PanResponder } from 'react-native';
 import type { UseDetailScreenBackOptions, UseDetailBackResult } from './types';
-import { BackIcon } from './BackIcon';
+import { HeaderBackButton } from './HeaderBackButton';
 import { useIsTablet } from './SplitViewBreakpointContext';
+import { getParentHref } from './navigation';
 
 /**
  * Custom hook to handle back navigation and gestures in master-detail split layouts.
@@ -50,7 +44,8 @@ export function useDetailScreenBack(
 
     const router = useRouter();
     const navigation = useNavigation();
-    const segments = useSegments();
+    // The real URL: route groups stripped and dynamic params resolved, unlike useSegments().
+    const pathname = usePathname();
     // The breakpoint is configured once, on the parent <SplitView>.
     // Re-renders only when the window width crosses it, not on every resize tick.
     const isTablet = useIsTablet();
@@ -64,16 +59,14 @@ export function useDetailScreenBack(
         onFallbackRef.current = onFallback;
     });
 
-    // Dynamically infer the parent route (e.g. dropping the active child segment) if not explicitly passed
-    const defaultFallback = useMemo(() => {
-        if (segments.length > 1) {
-            // Drops the last segment to target the parent layout/index
-            return `/${segments.slice(0, -1).join('/')}` as Href;
-        }
-        return '/' as Href;
-    }, [segments]);
+    // Infer the parent from the resolved pathname (e.g. dropping the active child segment).
+    const defaultFallback = useMemo(
+        () => getParentHref(pathname) ?? ('/' as Href),
+        [pathname]
+    );
 
     const targetFallback = fallbackRoute ?? defaultFallback;
+    const hasLogicalParent = getParentHref(pathname) !== null;
 
     // Helper to determine if a route corresponds to the master list
     const isIndexRoute = useCallback(
@@ -84,19 +77,23 @@ export function useDetailScreenBack(
             const target = masterRouteName ?? 'index';
             if (routeName === target) return true;
 
-            // Normalize route by stripping search params, hash, and trailing slashes
-            const cleanPath = routeName.split(/[?#]/)[0].replace(/\/+$/, '');
-            const pathSegments = cleanPath.split('/').filter(Boolean);
-            // Strip route groups in parentheses, e.g. (tabs), (drawer), (app)
-            const nonGroupSegments = pathSegments.filter(
-                (seg) => !(seg.startsWith('(') && seg.endsWith(')'))
-            );
+            // Normalize route by stripping search params, hash, and route groups
+            const pathSegments = routeName
+                .split(/[?#]/)[0]
+                .split('/')
+                .filter(Boolean)
+                .filter((seg) => !(seg.startsWith('(') && seg.endsWith(')')));
 
-            if (nonGroupSegments.length === 0) {
+            if (pathSegments.length === 0) {
                 return target === 'index';
             }
 
-            return nonGroupSegments[nonGroupSegments.length - 1] === target;
+            // A dynamic segment such as `[id]/index` is a detail route, not the master list.
+            if (pathSegments.some((seg) => seg.startsWith('['))) {
+                return false;
+            }
+
+            return pathSegments[pathSegments.length - 1] === target;
         },
         [userIsMasterRoute, masterRouteName]
     );
@@ -108,7 +105,16 @@ export function useDetailScreenBack(
         return state.routes.some((route) => isIndexRoute(route.name));
     }, [navigation, isIndexRoute]);
 
-    const checkCanGoBack = useCallback(() => navigation.canGoBack(), [navigation]);
+    // Only this navigator's stack matters. `navigation.canGoBack()` would also report
+    // parent history, which after a reload with anchors is true while the pane stack is
+    // still at its root and the native header shows no back arrow.
+    // Expo Router 58's tree state can omit `type`, so a missing type is treated as a stack.
+    const checkCanGoBack = useCallback(() => {
+        const state = navigation.getState();
+        if (!state?.routes) return false;
+        if (state.type && state.type !== 'stack') return false;
+        return state.index > 0;
+    }, [navigation]);
 
     // Re-render only when one of the derived booleans actually changes, instead of on every
     // navigation `state` event and every focus. Snapshots are re-read on each render too,
@@ -136,8 +142,11 @@ export function useDetailScreenBack(
         checkCanGoBack
     );
 
-    // Active condition: Intervene only on Mobile screens when the master list is NOT in history
-    const showCustomMobileBack = !isTablet && !hasIndexInHistory;
+    // Intervene whenever this stack has nothing to pop but the screen has a logical
+    // parent: reload / direct URL, on phone and tablet alike.
+    const showCustomBack = hasLogicalParent && !canGoBack;
+    // Kept for consumers that only want the phone-specific flag.
+    const showCustomMobileBack = showCustomBack && !isTablet;
 
     // On tablet, router.replace() is used to swap detail screens, so the placeholder is no longer
     // in history. When the user presses back at the root of a detail screen, the native stack has
@@ -145,14 +154,17 @@ export function useDetailScreenBack(
     const isTabletAtRoot = isTablet && !canGoBack;
 
     const handleBack = useCallback(() => {
-        if (navigation.canGoBack() || (!isTablet && checkHasIndexInHistory())) {
+        const state = navigation.getState();
+        const hasStackHistory =
+            !!state?.routes && (!state.type || state.type === 'stack') && state.index > 0;
+        if (hasStackHistory) {
             router.back();
         } else if (onFallbackRef.current) {
             onFallbackRef.current();
         } else {
-            router.replace(targetFallback);
+            router.dismissTo(targetFallback);
         }
-    }, [navigation, isTablet, checkHasIndexInHistory, router, targetFallback]);
+    }, [navigation, router, targetFallback]);
 
     // 1. Header Back Button
     useLayoutEffect(() => {
@@ -160,32 +172,16 @@ export function useDetailScreenBack(
 
         navigation.setOptions({
             ...(title !== undefined ? { title } : {}),
-            // In Tablet UI or when native back history exists, keep default native back behavior
-            headerBackVisible: !showCustomMobileBack,
-            headerLeft: showCustomMobileBack
+            // When native history exists, keep the default native back behavior.
+            headerBackVisible: !showCustomBack,
+            headerLeft: showCustomBack
                 ? () => (
-                    <Pressable
+                    <HeaderBackButton
                         onPress={handleBack}
-                        hitSlop={12}
-                        style={({ pressed }) => [
-                            styles.backButton,
-                            pressed && styles.backButtonPressed,
-                        ]}
-                        accessibilityRole="button"
-                        accessibilityLabel="Back"
-                    >
-                        {renderBackIcon?.({ color: tintColor }) ?? <BackIcon color={tintColor} />}
-                        {Platform.OS === 'ios' && backTitle && (
-                            <Text
-                                style={[
-                                    styles.backText,
-                                    tintColor ? { color: tintColor } : undefined,
-                                ]}
-                            >
-                                {backTitle}
-                            </Text>
-                        )}
-                    </Pressable>
+                        tintColor={tintColor}
+                        backTitle={backTitle}
+                        renderBackIcon={renderBackIcon}
+                    />
                 )
                 : undefined,
         });
@@ -193,7 +189,7 @@ export function useDetailScreenBack(
         navigation,
         showHeaderButton,
         title,
-        showCustomMobileBack,
+        showCustomBack,
         tintColor,
         backTitle,
         handleBack,
@@ -203,9 +199,9 @@ export function useDetailScreenBack(
     // 2. Android Hardware Back Button & System Back Gesture
     useFocusEffect(
         useCallback(() => {
-            // Intercept back when the custom mobile back is active, OR when on tablet at the stack
+            // Intercept back when the custom back is active, OR when on tablet at the stack
             // root (detail was opened via router.replace so there is nothing native to pop).
-            if (!showCustomMobileBack && !isTabletAtRoot) return;
+            if (!showCustomBack && !isTabletAtRoot) return;
 
             const onHardwareBack = () => {
                 handleBack();
@@ -217,7 +213,7 @@ export function useDetailScreenBack(
                 onHardwareBack
             );
             return () => subscription.remove();
-        }, [showCustomMobileBack, isTabletAtRoot, handleBack])
+        }, [showCustomBack, isTabletAtRoot, handleBack])
     );
 
     // 3. Mobile Edge-Swipe Back Gesture
@@ -250,6 +246,7 @@ export function useDetailScreenBack(
     // Stable reference between renders so consumers can safely use the result in dependency arrays.
     return useMemo(
         () => ({
+            showCustomBack,
             showCustomMobileBack,
             handleBack,
             panHandlers,
@@ -257,23 +254,14 @@ export function useDetailScreenBack(
             hasIndexInHistory,
             isTabletAtRoot,
         }),
-        [showCustomMobileBack, handleBack, panHandlers, isTablet, hasIndexInHistory, isTabletAtRoot]
+        [
+            showCustomBack,
+            showCustomMobileBack,
+            handleBack,
+            panHandlers,
+            isTablet,
+            hasIndexInHistory,
+            isTabletAtRoot,
+        ]
     );
 }
-
-const styles = StyleSheet.create({
-    backButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 6,
-        paddingRight: 8,
-        marginLeft: Platform.OS === 'ios' ? -8 : 0,
-    },
-    backButtonPressed: {
-        opacity: 0.5,
-    },
-    backText: {
-        fontSize: 17,
-        marginLeft: 4,
-    },
-});

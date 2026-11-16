@@ -47,6 +47,7 @@ import { SplitView } from 'expo-split-view';
 | `onMasterListResizeEnd` | `(width: number) => void` | `undefined` | Called when a resize completes: the user lets go, or `setWidth` / `reset` changed the width. Use this to persist the width. |
 | `unmountMasterOnPhone` | `boolean` | `false` | Unmounts the left pane (master list and left header) on phones instead of keeping it mounted but hidden. See [Mounting behavior on phones](#mounting-behavior-on-phones). |
 | `tabletBreakpoint` | `number` | `768` | Viewport width threshold (in points) for tablet layout. This is the **only** place the breakpoint is configured: `<SplitView.Placeholder>`, `useSplitView()`, and `useDetailScreenBack()` inside this `<SplitView>` read it automatically (they fall back to `768` outside a `<SplitView>`). |
+| `fallbackRoute` | `Href` | inferred parent | Where the sidebar back button and the phone placeholder go when the host has no previous route (reload / direct URL). Defaults to the host layout's logical parent; the app root has no parent, so no button is shown. See [Reload and direct URLs](#reload-and-direct-urls). |
 | `containerStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the root container. |
 | `masterStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the master (left) pane wrapper. |
 | `detailStyle` | `StyleProp<ViewStyle>` | `undefined` | Styles applied to the detail (right) pane wrapper. |
@@ -73,6 +74,33 @@ Set `unmountMasterOnPhone` to remove the hidden copy:
 ```
 
 With it enabled, below the breakpoint the left pane (including the built-in or custom `leftHeader`) is not rendered at all, so the master list is mounted only once. State held by the sidebar copy of the master list (scroll position, search text, and so on) is lost when the layout crosses the breakpoint, for example on rotation or window resize, because the pane remounts fresh when it becomes visible again. The right pane and its navigation state are not affected.
+
+### Reload and direct URLs
+
+On web, Expo Router rebuilds navigation state from the URL alone, so a reload or a
+direct link has no in-app history. Every back affordance in this module is derived
+from navigation state, which would otherwise leave both panes with no back button.
+
+The module recovers by deriving a **logical parent** from the real URL
+(`usePathname()`, so route groups are stripped and dynamic params resolved):
+
+- **Left sidebar:** when the outer stack has no history, the back button goes to
+  the inferred parent of the host layout's base path. Pass `fallbackRoute` to
+  override it.
+- **Detail screens:** `useDetailScreenBack` injects a back button into the native
+  header whenever the pane stack has no previous route but the screen has a
+  logical parent, on phones and tablets. The fallback is the pathname's parent;
+  pass `fallbackRoute` when the parent cannot be inferred (for example a sub-page
+  opened from a dynamic detail).
+- **Phone placeholder:** when the master list itself is the only route and the
+  host has a logical parent, the same fallback button is injected.
+
+Anchors are still the most robust option: export
+`unstable_settings = { anchor: 'index' }` from the layout that renders
+`<SplitView>` (and any nested stack layout) so Expo Router rebuilds the missing
+routes on reload and the native headers work on their own. Older Expo Router
+versions call this `initialRouteName`. The fallbacks above cover apps that do not
+use anchors.
 
 ### Resizable master pane
 
@@ -162,6 +190,14 @@ import { SplitViewPlaceholder } from 'expo-split-view';
 `<SplitView.Placeholder>` no longer takes a `tabletBreakpoint` prop. It uses the `tabletBreakpoint` of the parent `<SplitView>` (default `768`).
 :::
 
+::: tip Back after a reload
+On phones, when the master list is the only route in the stack but the host layout
+has a logical parent (for example `/employees` inside an app whose root is `/`),
+the placeholder injects a back button to that parent. The target comes from the
+parent `<SplitView>`'s `fallbackRoute`, or its inferred parent. Nothing is injected
+when the host is the app root.
+:::
+
 
 ## `<SplitView.Detail />`
 
@@ -213,6 +249,7 @@ Custom hook for detail screens providing resilient back navigation and gestures 
 import { useDetailScreenBack } from 'expo-split-view';
 
 const {
+  showCustomBack,
   showCustomMobileBack,
   handleBack,
   panHandlers,
@@ -228,7 +265,7 @@ The tablet breakpoint comes from the parent `<SplitView>`'s `tabletBreakpoint` p
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `fallbackRoute` | `Href` | `parent route` | Target fallback route if the master list is absent from stack history (dynamically drops the active screen segment, or `'/'`). |
+| `fallbackRoute` | `Href` | `usePathname()` parent | Target when this stack has no previous route. The default drops the active path segment from the real URL (route groups stripped, params resolved); search params are not preserved. Pass it when the logical parent cannot be inferred, e.g. a sub-page opened from a dynamic detail. |
 | `title` | `string` | `undefined` | Header title string. |
 | `backTitle` | `string \| null` | `'Back'` | Back button label on iOS (pass `""` or `null` to hide). |
 | `showHeaderButton` | `boolean` | `true` | Automatically inject custom back button when required. |
@@ -247,14 +284,15 @@ A new function identity makes the hook re-apply the header options (`renderBackI
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
-| `showCustomMobileBack` | `boolean` | `true` when custom back behavior is active (phone & index absent from history). |
-| `handleBack` | `() => void` | Executes safe back action (`router.back()` or fallback). |
-| `panHandlers` | `GestureResponderHandlers` | Touch handlers for iOS edge-swipe back gesture. Handled automatically when using `<SplitView.Detail>`. |
+| `showCustomBack` | `boolean` | `true` when this stack has no previous route but the screen has a logical parent (reload / direct URL). Applies to phones and tablets. |
+| `showCustomMobileBack` | `boolean` | Phone-only alias of `showCustomBack`, kept for backwards compatibility. |
+| `handleBack` | `() => void` | Executes the safe back action: pops this stack when possible, calls `onFallback`, or navigates to the fallback with `router.dismissTo`. |
+| `panHandlers` | `GestureResponderHandlers` | Touch handlers for the edge-swipe back gesture (phone layouts). Handled automatically when using `<SplitView.Detail>`. |
 | `isTablet` | `boolean` | `true` if current viewport width >= the parent `<SplitView>`'s `tabletBreakpoint`. |
-| `hasIndexInHistory` | `boolean` | `true` if `index` route exists in current stack navigation history. |
+| `hasIndexInHistory` | `boolean` | `true` if the master list route exists in the current stack history. Matching is exact on the last non-group segment and dynamic routes such as `[id]/index` are excluded; it no longer gates the back handling. |
 | `isTabletAtRoot` | `boolean` | `true` when on tablet and at the root of the navigation stack. Back is intercepted to return to placeholder/fallback instead of exiting the app. |
 
-The hook does not re-render your screen on every navigation event or window resize. It re-renders only when the layout crosses the tablet breakpoint or when its navigation-derived values (whether the master list is in history, whether the stack can go back) change. The returned object is memoized, so it is safe to use in dependency arrays.
+The hook does not re-render your screen on every navigation event or window resize. It re-renders only when the layout crosses the tablet breakpoint or when its navigation-derived values (whether the stack can go back) change. The returned object is memoized, so it is safe to use in dependency arrays.
 
 
 ## `useSplitViewResize()`
@@ -298,8 +336,8 @@ const { canGoBack, goBack } = useCustomLeftHeader();
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
-| `canGoBack` | `boolean` | `true` when the screen hosting the split view has a previous screen in the outer navigator. |
-| `goBack` | `() => void` | Safely pops the screen hosting the split view (never pops right-pane screens). |
+| `canGoBack` | `boolean` | `true` when the screen hosting the split view has a previous screen in the outer navigator, **or** a logical parent fallback exists (reload / direct URL). |
+| `goBack` | `() => void` | Safely pops the screen hosting the split view (never pops right-pane screens), or navigates to the fallback when there is no history. |
 
 ::: info Behavior Outside Sidebar
 Outside the left sidebar (for example, on phones where `MasterList` is rendered in the root index screen), it safely returns `{ canGoBack: false, goBack: () => {} }`.
@@ -333,9 +371,9 @@ Context value passed to the `leftHeader` render function and returned by `useCus
 
 ```tsx
 export type SplitViewLeftHeaderValueProps = {
-  /** True when the screen hosting the split view has a previous screen to return to. */
+  /** True when the host has a previous screen to return to, or a logical parent fallback. */
   canGoBack: boolean;
-  /** Pops the screen hosting the split view. Never pops right-pane screens. */
+  /** Pops the host (never right-pane screens), or navigates to the fallback without history. */
   goBack: () => void;
 };
 ```

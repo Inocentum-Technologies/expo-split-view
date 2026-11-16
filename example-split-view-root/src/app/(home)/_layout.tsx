@@ -2,6 +2,10 @@ import { SplitView } from 'expo-split-view';
 import { MasterList } from '@/components/MasterList';
 import { useTheme } from '@/hooks/use-theme';
 
+// Rebuilds [index, home] on reload / direct URL so the native headers can go back.
+// expo-router 56 used `initialRouteName`; newer versions call it `anchor`.
+export const unstable_settings = { anchor: 'index' };
+
 export default function HomeLayout() {
     const theme = useTheme();
 

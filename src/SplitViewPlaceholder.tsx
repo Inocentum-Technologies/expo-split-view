@@ -1,7 +1,16 @@
-import { Stack, useTheme, type NativeStackNavigationOptions } from 'expo-router';
+import {
+    Stack,
+    useNavigation,
+    useRouter,
+    useTheme,
+    type NativeStackNavigationOptions,
+} from 'expo-router';
 import { StyleSheet, Text, View, type ColorValue } from 'react-native';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { SplitViewPlaceholderProps } from './types';
 import { useIsTablet } from './SplitViewBreakpointContext';
+import { useSplitViewFallbackRoute } from './SplitViewFallbackContext';
+import { HeaderBackButton } from './HeaderBackButton';
 
 // Stable references so <Stack.Screen> only re-applies options when the mode changes.
 const renderNoHeaderLeft = () => null;
@@ -22,12 +31,40 @@ export function SplitViewPlaceholder({
     // The breakpoint is configured once, on the parent <SplitView>.
     // Re-renders only when the window width crosses it, not on every resize tick.
     const isTablet = useIsTablet();
+    const navigation = useNavigation();
+    const router = useRouter();
+    const fallbackRoute = useSplitViewFallbackRoute();
+
+    // Parent bubbling is intended here: before a reload the outer stack provides the
+    // back arrow to the screen that pushed the split view. After a reload it cannot.
+    const subscribe = useCallback(
+        (notify: () => void) => navigation.addListener('state', notify),
+        [navigation]
+    );
+    const checkCanGoBack = useCallback(() => navigation.canGoBack(), [navigation]);
+    const canGoBack = useSyncExternalStore(subscribe, checkCanGoBack, checkCanGoBack);
+
+    // After a reload on the master list itself there is nothing to pop, so inject the
+    // same fallback back affordance the detail screens use.
+    const showCustomBack = !isTablet && !canGoBack && fallbackRoute !== null;
+
+    const onBack = useCallback(() => {
+        if (fallbackRoute) router.dismissTo(fallbackRoute);
+    }, [router, fallbackRoute]);
+
+    const phoneOptions = useMemo<NativeStackNavigationOptions>(() => {
+        if (!showCustomBack) return PHONE_OPTIONS;
+        return {
+            headerBackVisible: false,
+            headerLeft: () => <HeaderBackButton onPress={onBack} />,
+        };
+    }, [showCustomBack, onBack]);
 
     // If phone, render the Master List inside the full-screen stack
     if (!isTablet) {
         return (
             <>
-                <Stack.Screen options={PHONE_OPTIONS} />
+                <Stack.Screen options={phoneOptions} />
                 {masterList}
             </>
         );

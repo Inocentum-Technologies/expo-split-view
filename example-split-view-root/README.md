@@ -46,6 +46,12 @@ Run `npm run web` (or press `w` in terminal). Simply drag and resize the browser
 ### 3. Android Emulator
 - Run on a tablet emulator, phone emulator, or foldable device.
 
+### 4. Reload / direct URL (web)
+Reload on `/[id]` or `/subpage?source=<id>&id=<id>` and check that the header back
+arrow still works. The `(home)` layout uses `unstable_settings = { anchor: 'index' }`,
+so Expo Router rebuilds the master list in history and the arrow returns to it.
+Remove the anchor to exercise the URL-derived fallback instead.
+
 ---
 
 ## What This Example Demonstrates
