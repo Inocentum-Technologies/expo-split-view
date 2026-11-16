@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
 On tablet, `canGoBack` is `true` when the screen hosting the split view has a previous screen in the outer navigator. On mobile (or outside the left pane), `canGoBack` is `false` and `goBack` is a safe no-op.
 
-## Resizable Master Pane
+## Resizable Master Pane <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 Let users drag the boundary between the panes to make the master list wider or narrower. The feature is off by default. Enable it with `resizable`:
 

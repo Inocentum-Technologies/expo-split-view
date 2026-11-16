@@ -89,7 +89,7 @@ On phones:
 Because the hidden left pane stays mounted, your master list is mounted twice on phones (hidden in the left pane, and full-screen by `<SplitView.Placeholder>`), so its effects and data fetching run twice. If that matters, pass `unmountMasterOnPhone` to `<SplitView>` to unmount the hidden copy. The trade-off is that the sidebar copy's state (scroll position, search text) is lost when the layout crosses the breakpoint. See [Mounting behavior on phones](/api/reference#mounting-behavior-on-phones).
 :::
 
-### Reload and direct URLs
+### Reload and direct URLs <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 On web, Expo Router rebuilds navigation state from the URL alone. A reload or a
 direct link therefore has no in-app history, and the native headers have nothing

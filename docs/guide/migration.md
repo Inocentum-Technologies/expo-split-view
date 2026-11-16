@@ -1,6 +1,6 @@
 # Migration Guide
 
-Changes you may need to act on when upgrading to `expo-split-view` **0.0.4-rc.1**. For the full list of changes, see the [changelog](/guide/changelog).
+Changes you may need to act on when upgrading to `expo-split-view` **0.0.4 or later**. For the full list of changes, see the [changelog](/guide/changelog).
 
 ## Breaking: `tabletBreakpoint` is configured only on `<SplitView>`
 
@@ -44,7 +44,7 @@ The built-in sidebar header (`leftHeader={true}`) now picks its default height f
 
 The default options for the right-pane `<Stack />` now also include native header inset flags (`unstable_nativeProps.headerConfig`). Your `stackScreenOptions` are merged over the defaults, so options you already pass keep working. See [Stack screen option defaults](/api/reference#stack-screen-option-defaults).
 
-### Back navigation after reload / direct URLs
+### Back navigation after reload / direct URLs <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 Fallback targets are now derived from `usePathname()` instead of `useSegments()`, so
 route groups are stripped and dynamic params are resolved. The old inference could

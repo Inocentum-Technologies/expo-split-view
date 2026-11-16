@@ -75,7 +75,7 @@ Set `unmountMasterOnPhone` to remove the hidden copy:
 
 With it enabled, below the breakpoint the left pane (including the built-in or custom `leftHeader`) is not rendered at all, so the master list is mounted only once. State held by the sidebar copy of the master list (scroll position, search text, and so on) is lost when the layout crosses the breakpoint, for example on rotation or window resize, because the pane remounts fresh when it becomes visible again. The right pane and its navigation state are not affected.
 
-### Reload and direct URLs
+### Reload and direct URLs <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 On web, Expo Router rebuilds navigation state from the URL alone, so a reload or a
 direct link has no in-app history. Every back affordance in this module is derived
@@ -102,7 +102,7 @@ routes on reload and the native headers work on their own. Older Expo Router
 versions call this `initialRouteName`. The fallbacks above cover apps that do not
 use anchors.
 
-### Resizable master pane
+### Resizable master pane <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 Set `resizable` to let users drag the boundary between the panes:
 
@@ -295,7 +295,7 @@ A new function identity makes the hook re-apply the header options (`renderBackI
 The hook does not re-render your screen on every navigation event or window resize. It re-renders only when the layout crosses the tablet breakpoint or when its navigation-derived values (whether the stack can go back) change. The returned object is memoized, so it is safe to use in dependency arrays.
 
 
-## `useSplitViewResize()`
+## `useSplitViewResize()` <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 Reads and controls the master pane width from any component inside a `<SplitView>` (the master list, detail screens, custom handle content).
 
@@ -392,7 +392,7 @@ export type BackIconProps = {
 };
 ```
 
-### `SplitViewResizeHandleState`
+### `SplitViewResizeHandleState` <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 State passed to a function-style `resizeHandle`:
 
@@ -409,7 +409,7 @@ export interface SplitViewResizeHandleState {
 }
 ```
 
-### `UseSplitViewResizeResult`
+### `UseSplitViewResizeResult` <Badge type="tip" text="New in 0.0.5-rc.1" />
 
 Returned by `useSplitViewResize()`:
 

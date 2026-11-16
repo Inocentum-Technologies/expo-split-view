@@ -2,7 +2,7 @@
 
 All notable changes to `expo-split-view`, newest first. Releases are published on [npm](https://www.npmjs.com/package/expo-split-view).
 
-## Unreleased
+## 0.0.5-rc.1
 
 ### 🚀 What's New
 
