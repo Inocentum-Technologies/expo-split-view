@@ -30,6 +30,24 @@ export function getParentHref(pathname: string): Href | null {
 }
 
 /**
+ * Whether a route name refers to `target` (normally the `index` screen).
+ * Route groups are ignored, and dynamic segments such as `[id]/index` never match.
+ */
+export function matchesRouteName(routeName: string | undefined, target: string): boolean {
+    if (!routeName) return false;
+    if (routeName === target) return true;
+
+    const segments = routeName
+        .split(/[?#]/)[0]
+        .split('/')
+        .filter(Boolean)
+        .filter((segment) => !(segment.startsWith('(') && segment.endsWith(')')));
+    if (segments.length === 0) return target === 'index';
+    if (segments.some((segment) => segment.startsWith('['))) return false;
+    return segments[segments.length - 1] === target;
+}
+
+/**
  * Base path of the layout that hosts a `<SplitView>`.
  *
  * `hostRouteName` is the name of the focused route in the host's parent navigator

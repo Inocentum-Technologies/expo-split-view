@@ -236,7 +236,7 @@ The hook takes no parameters. The tablet breakpoint comes from the parent `<Spli
 | :--- | :--- | :--- |
 | `isTablet` | `boolean` | `true` if current viewport width >= the parent `<SplitView>`'s `tabletBreakpoint`. |
 | `width` | `number` | Current screen width in points / dp. |
-| `navigate` | `(href: Href) => void` | Navigates to a detail route: uses `router.replace(href)` on tablet and `router.push(href)` on phone. |
+| `navigate` | `(href: Href) => void` | Navigates to a detail route. On tablet it keeps the placeholder as the pane root, replaces the first-level detail and dismisses subpages. If the pane was opened directly on a detail or subpage, that stack is dropped first so Back never returns to the previous item's screens. On phone it calls `router.push(href)`. |
 
 The returned object is memoized, so it is safe to use in dependency arrays.
 

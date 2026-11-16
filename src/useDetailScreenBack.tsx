@@ -16,7 +16,7 @@ import { BackHandler, PanResponder } from 'react-native';
 import type { UseDetailScreenBackOptions, UseDetailBackResult } from './types';
 import { HeaderBackButton } from './HeaderBackButton';
 import { useIsTablet } from './SplitViewBreakpointContext';
-import { getParentHref } from './navigation';
+import { getParentHref, matchesRouteName } from './navigation';
 
 /**
  * Custom hook to handle back navigation and gestures in master-detail split layouts.
@@ -73,27 +73,7 @@ export function useDetailScreenBack(
         (routeName: string) => {
             if (!routeName) return false;
             if (userIsMasterRoute) return userIsMasterRoute(routeName);
-
-            const target = masterRouteName ?? 'index';
-            if (routeName === target) return true;
-
-            // Normalize route by stripping search params, hash, and route groups
-            const pathSegments = routeName
-                .split(/[?#]/)[0]
-                .split('/')
-                .filter(Boolean)
-                .filter((seg) => !(seg.startsWith('(') && seg.endsWith(')')));
-
-            if (pathSegments.length === 0) {
-                return target === 'index';
-            }
-
-            // A dynamic segment such as `[id]/index` is a detail route, not the master list.
-            if (pathSegments.some((seg) => seg.startsWith('['))) {
-                return false;
-            }
-
-            return pathSegments[pathSegments.length - 1] === target;
+            return matchesRouteName(routeName, masterRouteName ?? 'index');
         },
         [userIsMasterRoute, masterRouteName]
     );
